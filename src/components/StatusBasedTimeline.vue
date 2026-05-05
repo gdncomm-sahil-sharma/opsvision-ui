@@ -11,7 +11,8 @@ const props = defineProps({
     }
 })
 
-const { isDark } = useThemeStore()
+const themeStore = useThemeStore()
+const { isDark } = themeStore
 
 const formatDate = (epochTimestamp) => {
     return moment(epochTimestamp).format('MMM D, YYYY')
