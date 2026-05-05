@@ -6,7 +6,7 @@
             class="flex justify-end mb-4"
         >
             <div class="max-w-4xl">
-                <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4 transform transition-all duration-200 hover:shadow-sm hover:scale-[1.01]">
+                <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4">
                     <p class="text-gray-900 text-base leading-relaxed">
                         {{ message.content }}
                     </p>
@@ -24,7 +24,7 @@
         >
             <div class="max-w-6xl">
                 <!-- Assistant Avatar -->
-                <div class="flex items-start space-x-3 mb-2">
+                <div class="flex items-start space-x-4 mb-2">
                     <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
                         <svg
                             class="w-5 h-5 text-white"
@@ -37,9 +37,6 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                    </div>
-                    <div class="text-sm font-semibold text-gray-800">
-                        OPSVISION
                     </div>
                 </div>
 
@@ -67,11 +64,33 @@
                 <!-- Assistant Response Content -->
                 <div
                     v-else
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-5 transform transition-all duration-200 hover:shadow-md hover:border-gray-300"
+                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md"
                 >
+                    <!-- Text Response Section -->
+                    <div
+                        v-if="getResponseType(message.results).includes('text')"
+                        class="px-6 py-5"
+                    >
+                        <AIBulletin
+                            :key="message.results.data.textResponse.summary"
+                            :data="message.results.data.textResponse"
+                            :animate-text="false"
+                            :animate-bullets="false"
+                            :show-copy-button="true"
+                            :show-timestamp="false"
+                        />
+                    </div>
+                    
+                    <!-- Subtle separator line -->
+                    <div
+                        v-if="getResponseType(message.results).includes('text') && getResponseType(message.results).includes('timelines')"
+                        class="border-t border-gray-100"
+                    ></div>
+                    
+                    <!-- Timeline Section -->
                     <div
                         v-if="getResponseType(message.results).includes('timelines')"
-                        class="w-full"
+                        class="px-6 py-5"
                     >
                         <StatusBasedTimeline
                             :title="message.results.data.timelines.title"
@@ -92,6 +111,7 @@
 import { defineProps } from 'vue'
 import { getResponseType } from '../utils/responseHelper.js'
 import StatusBasedTimeline from './StatusBasedTimeline.vue'
+import AIBulletin from './AIBulletin.vue'
 
 defineProps({
     message: {

@@ -115,21 +115,54 @@ const getStatusBadgeClass = (status) => {
         return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
     }
 }
+
+const getInlineStatusStyle = (status) => {
+    if (isDark.value) {
+        switch (status) {
+        case 'COMPLETED':
+            return 'background-color: rgba(20, 83, 45, 0.2) !important; color: #4ade80 !important;'
+        case 'PENDING':
+            return 'background-color: rgba(30, 58, 138, 0.2) !important; color: #60a5fa !important;'
+        case 'FAILED':
+            return 'background-color: rgba(127, 29, 29, 0.2) !important; color: #f87171 !important;'
+        case 'NOT_STARTED':
+        case 'CANCELLED':
+            return 'background-color: #1f2937 !important; color: #d1d5db !important;'
+        default:
+            return 'background-color: #1f2937 !important; color: #d1d5db !important;'
+        }
+    } else {
+        switch (status) {
+        case 'COMPLETED':
+            return 'background-color: #dcfce7 !important; color: #166534 !important;'
+        case 'PENDING':
+            return 'background-color: #dbeafe !important; color: #1e40af !important;'
+        case 'FAILED':
+            return 'background-color: #fee2e2 !important; color: #991b1b !important;'
+        case 'NOT_STARTED':
+        case 'CANCELLED':
+            return 'background-color: #f3f4f6 !important; color: #374151 !important;'
+        default:
+            return 'background-color: #f3f4f6 !important; color: #374151 !important;'
+        }
+    }
+}
 </script>
 
 <template>
-    <div
-        class="w-full px-6 pt-6 pb-0 rounded-lg transition-colors duration-300"
-        :class="isDark ? 'bg-gray-800' : 'bg-white'"
-        style="min-width: 700px; max-width: 90vw; margin: 0 auto;"
-    >
+    <div class="w-full">
         <div class="mb-6">
-            <h3
-                class="text-xl font-bold text-left"
-                :class="isDark ? 'text-white' : 'text-gray-900'"
-            >
-                {{ title }}
-            </h3>
+            <div class="flex items-center gap-3 pb-3">
+                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3
+                    class="text-lg font-semibold text-left"
+                    :class="isDark ? 'text-white' : 'text-gray-900'"
+                >
+                    {{ title }}
+                </h3>
+            </div>
         </div>
 
         <div
@@ -148,28 +181,44 @@ const getStatusBadgeClass = (status) => {
                         class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm indicator-circle"
                         :class="getNumberIndicatorClass(item)"
                     >
-                        <span v-if="item.status === 'COMPLETED'">✓</span>
-                        <span v-else-if="item.status === 'FAILED'">✗</span>
+                        <!-- Completed -->
+                        <svg v-if="item.status === 'COMPLETED'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <!-- Failed -->
+                        <svg v-else-if="item.status === 'FAILED'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <!-- In Progress/Pending (Clock with spinning animation) -->
+                        <svg v-else-if="item.status === 'PENDING' || item.status === 'IN_PROGRESS'" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <!-- Default number -->
                         <span v-else>{{ getItemNumber(item) }}</span>
                     </div>
                 </template>
-            </UTimeline>
 
-            <!-- Status Badges Overlay -->
-            <div class="status-badges-container">
-                <div
-                    v-for="(item, index) in processedItems"
-                    :key="`status-${index}`"
-                    class="status-badge-wrapper"
-                >
-                    <span
-                        class="inline-flex items-center px-4 py-2 rounded-md text-xs transition-colors duration-200 status-badge font-bold"
-                        :class="getStatusBadgeClass(item.status)"
-                    >
-                        {{ item.status.replace('_', ' ') }}
+                <template #title="{ item }">
+                    <span class="font-semibold" :class="isDark ? 'text-white' : 'text-gray-900'">
+                        {{ item.title }}
                     </span>
-                </div>
-            </div>
+                </template>
+
+                <template #date="{ item }">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="text-xs" :class="isDark ? 'text-gray-300' : 'text-gray-500'">
+                            {{ item.date }}
+                        </span>
+                        <span
+                            class="inline-flex items-center px-4 py-2 rounded-md text-xs status-badge font-bold ml-4 shrink-0"
+                            :class="getStatusBadgeClass(item.status)"
+                            :style="getInlineStatusStyle(item.status)"
+                        >
+                            {{ item.status.replace('_', ' ') }}
+                        </span>
+                    </div>
+                </template>
+            </UTimeline>
         </div>
     </div>
 </template>
@@ -832,22 +881,9 @@ const getStatusBadgeClass = (status) => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.status-badge:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
+/* Removed hover animation */
 
 /* Adjust gap between badges based on timeline spacing */
-@media (min-width: 640px) {
-  .status-badges-container {
-    gap: 40px;
-  }
-
-  .status-badge-wrapper {
-    min-height: 60px;
-  }
-}
 
 /* Border bottom for timeline content wrapper - multiple selectors */
 .status-timeline :deep([data-slot="wrapper"]),
