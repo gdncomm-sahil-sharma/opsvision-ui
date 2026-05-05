@@ -19,7 +19,10 @@ export default [
                 Buffer: 'readonly',
                 __dirname: 'readonly',
                 __filename: 'readonly',
-                global: 'readonly'
+                global: 'readonly',
+                window: 'readonly',
+                document: 'readonly',
+                navigator: 'readonly'
             }
         }
     },

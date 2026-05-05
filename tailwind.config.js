@@ -5,7 +5,11 @@ export default {
         './src/**/*.{vue,js,ts,jsx,tsx}'
     ],
     theme: {
-        extend: {}
+        extend: {
+            fontFamily: {
+                sans: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica Neue', 'sans-serif']
+            }
+        }
     },
     plugins: []
 }
