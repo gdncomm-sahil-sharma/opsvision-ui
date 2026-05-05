@@ -1,36 +1,30 @@
 <script setup>
-import ChatContainer from './components/ChatContainer.vue'
+import { ref, provide } from 'vue'
+import Sidebar from './components/Sidebar.vue'
+
+const isCollapsed = ref(false)
+
+// Provide the collapsed state to child components
+provide('sidebarCollapsed', isCollapsed)
+
+const handleSidebarToggle = (collapsed) => {
+    isCollapsed.value = collapsed
+}
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 flex flex-col">
-        <!-- Header -->
-        <header class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="px-6 py-3">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                        <svg
-                            class="w-5 h-5 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </div>
-                    <h1 class="text-xl font-semibold text-gray-900">
-                        OPSVISION
-                    </h1>
-                </div>
-            </div>
-        </header>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <Sidebar @toggle="handleSidebarToggle" />
 
-        <!-- Chat Container -->
-        <div class="flex-1 flex flex-col min-h-0">
-            <ChatContainer />
+        <!-- Main Content Area with dynamic left margin -->
+        <div
+            :class="[
+                'transition-all duration-300 ease-in-out min-h-screen',
+                isCollapsed ? 'ml-16' : 'ml-64'
+            ]"
+        >
+            <router-view />
         </div>
     </div>
 </template>

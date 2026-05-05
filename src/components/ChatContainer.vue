@@ -168,7 +168,8 @@
         >
             <div
                 v-if="store.messages.length > 0"
-                class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50"
+                class="fixed bottom-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50 transition-all duration-300"
+                :style="{ left: sidebarCollapsed ? '4rem' : '16rem' }"
             >
                 <div class="max-w-4xl mx-auto">
                     <div class="flex items-stretch space-x-2">
@@ -237,9 +238,12 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, inject } from 'vue'
 import ChatBubble from './ChatBubble.vue'
 import { useSearchStore } from '../stores/searchStore.js'
+
+// Get sidebar collapsed state from parent
+const sidebarCollapsed = inject('sidebarCollapsed', ref(false))
 
 // Reactive data
 const messagesContainer = ref(null)
