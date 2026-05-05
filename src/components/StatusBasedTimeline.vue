@@ -98,12 +98,30 @@ const getNumberIndicatorClass = (item) => {
         return 'bg-gray-400'
     }
 }
+
+const getStatusBadgeClass = (status) => {
+    switch (status) {
+    case 'COMPLETED':
+        return isDark.value ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-800'
+    case 'PENDING':
+        return isDark.value ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-800'
+    case 'FAILED':
+        return isDark.value ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-800'
+    case 'NOT_STARTED':
+        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+    case 'CANCELLED':
+        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+    default:
+        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+    }
+}
 </script>
 
 <template>
     <div
-        class="max-w-2xl mx-auto p-6 rounded-lg transition-colors duration-300"
+        class="w-full px-6 pt-6 pb-0 rounded-lg transition-colors duration-300"
         :class="isDark ? 'bg-gray-800' : 'bg-white'"
+        style="min-width: 700px; max-width: 90vw; margin: 0 auto;"
     >
         <div class="mb-6">
             <h3
@@ -136,6 +154,22 @@ const getNumberIndicatorClass = (item) => {
                     </div>
                 </template>
             </UTimeline>
+
+            <!-- Status Badges Overlay -->
+            <div class="status-badges-container">
+                <div
+                    v-for="(item, index) in processedItems"
+                    :key="`status-${index}`"
+                    class="status-badge-wrapper"
+                >
+                    <span
+                        class="inline-flex items-center px-4 py-2 rounded-md text-xs transition-colors duration-200 status-badge font-bold"
+                        :class="getStatusBadgeClass(item.status)"
+                    >
+                        {{ item.status.replace('_', ' ') }}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -739,5 +773,142 @@ const getNumberIndicatorClass = (item) => {
     transform: rotate(360deg);
     opacity: 1;
   }
+}
+
+/* Ensure the wrapper has full width for flex layout */
+.compact-timeline :deep(.group .wrapper) {
+  width: 100% !important;
+}
+
+/* Status badge styling */
+.flex-shrink-0 span {
+  white-space: nowrap;
+}
+
+/* Ensure the flex container works properly */
+.status-timeline :deep(.wrapper) {
+  display: flex !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+}
+
+/* Make sure the default content area takes full width */
+.status-timeline :deep(.group) {
+  position: relative;
+}
+
+.status-timeline :deep(.group .wrapper) {
+  position: relative;
+  width: 100%;
+}
+
+/* Status badges positioning */
+.timeline-wrapper {
+  position: relative;
+}
+
+.status-badges-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-top: 25px;
+}
+
+.status-badge-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 50px;
+  align-items: flex-start;
+  margin-top: -2px;
+}
+
+.status-badge {
+  white-space: nowrap;
+  font-size: 11px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+/* Adjust gap between badges based on timeline spacing */
+@media (min-width: 640px) {
+  .status-badges-container {
+    gap: 40px;
+  }
+
+  .status-badge-wrapper {
+    min-height: 60px;
+  }
+}
+
+/* Border bottom for timeline content wrapper - multiple selectors */
+.status-timeline :deep([data-slot="wrapper"]),
+.status-timeline :deep(.group .wrapper),
+.timeline-wrapper :deep([data-slot="wrapper"]),
+.compact-timeline :deep([data-slot="wrapper"]) {
+  border-bottom: 1px solid #e5e7eb !important;
+  padding-bottom: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+.status-timeline :deep(.group:last-child [data-slot="wrapper"]),
+.status-timeline :deep(.group:last-child .wrapper),
+.timeline-wrapper :deep(.group:last-child [data-slot="wrapper"]),
+.compact-timeline :deep(.group:last-child [data-slot="wrapper"]) {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+/* Dark mode wrapper border */
+.dark-timeline .status-timeline :deep([data-slot="wrapper"]),
+.dark-timeline .timeline-wrapper :deep([data-slot="wrapper"]),
+.dark-timeline .compact-timeline :deep([data-slot="wrapper"]) {
+  border-bottom-color: #374151 !important;
+}
+
+/* Alternative approach using nth-child for direct border application */
+.status-timeline :deep(.group:nth-child(1) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(2) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(3) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(4) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(5) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(6) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(7) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(8) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+.status-timeline :deep(.group:nth-child(9) [data-slot="wrapper"]) { border-bottom: 1px solid #e5e7eb !important; }
+
+/* Direct class targeting for wrapper element */
+.w-full.mt-1\.5.pb-6\.5 {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Target within timeline context */
+.status-timeline .w-full.mt-1\.5.pb-6\.5 {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.timeline-wrapper .w-full.mt-1\.5.pb-6\.5 {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Last item exception */
+.status-timeline .group:last-child .w-full.mt-1\.5.pb-6\.5 {
+  border-bottom: none !important;
+}
+
+/* Dark mode for specific class */
+.dark-timeline .w-full.mt-1\.5.pb-6\.5,
+.dark-timeline .status-timeline .w-full.mt-1\.5.pb-6\.5,
+.dark-timeline .timeline-wrapper .w-full.mt-1\.5.pb-6\.5 {
+  border-bottom-color: #374151 !important;
 }
 </style>

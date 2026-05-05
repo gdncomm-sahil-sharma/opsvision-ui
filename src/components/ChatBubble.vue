@@ -22,7 +22,7 @@
             v-else
             class="flex justify-start mb-6"
         >
-            <div class="max-w-4xl">
+            <div class="max-w-6xl">
                 <!-- Assistant Avatar -->
                 <div class="flex items-start space-x-3 mb-2">
                     <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
@@ -69,7 +69,10 @@
                     v-else
                     class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-5"
                 >
-                    <div v-if="getResponseType(message.results).includes('timelines')">
+                    <div
+                        v-if="getResponseType(message.results).includes('timelines')"
+                        class="w-full"
+                    >
                         <StatusBasedTimeline
                             :title="message.results.data.timelines.title"
                             :timelineData="message.results.data.timelines.data"
