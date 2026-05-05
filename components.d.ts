@@ -11,6 +11,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ChatBubble: typeof import('./src/components/ChatBubble.vue')['default']
+    ChatContainer: typeof import('./src/components/ChatContainer.vue')['default']
     HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
     QuerySearchBox: typeof import('./src/components/QuerySearchBox.vue')['default']
     Results: typeof import('./src/components/Results.vue')['default']
