@@ -11,7 +11,7 @@
                 v-if="store.messages.length === 0"
                 class="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center"
             >
-                <div class="mb-12">
+                <div class="mb-12 mt-16">
                     <div class="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg
                             class="w-8 h-8 text-white"
@@ -133,23 +133,52 @@
             class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50"
         >
             <div class="max-w-4xl mx-auto">
-                <div class="relative flex items-center">
-                    <input
-                        v-model="store.inputMessage"
-                        type="text"
-                        placeholder="Ask anything about your warehouse operations..."
-                        class="w-full px-4 py-3 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm"
-                        @keyup.enter="handleSendMessage"
-                        :disabled="store.loading"
-                    />
+                <div class="flex items-stretch space-x-2">
+                    <div class="relative flex-1">
+                        <input
+                            v-model="store.inputMessage"
+                            type="text"
+                            placeholder="Ask anything about your warehouse operations..."
+                            class="w-full h-12 px-4 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm"
+                            @keyup.enter="handleSendMessage"
+                            :disabled="store.loading"
+                        />
+                        <button
+                            @click="handleSendMessage"
+                            :disabled="!store.inputMessage.trim() || store.loading"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                        >
+                            <svg
+                                v-if="!store.loading"
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                />
+                            </svg>
+                            <div
+                                v-else
+                                class="w-4 h-4"
+                            >
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Start Over Button (Icon Only) -->
                     <button
-                        @click="handleSendMessage"
-                        :disabled="!store.inputMessage.trim() || store.loading"
-                        class="absolute right-2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                        @click="handleNewSearch"
+                        class="flex items-center justify-center w-12 h-12 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 cursor-pointer border border-gray-300"
+                        title="Clear chat and start over"
                     >
                         <svg
-                            v-if="!store.loading"
-                            class="w-4 h-4"
+                            class="w-5 h-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -158,15 +187,9 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                             />
                         </svg>
-                        <div
-                            v-else
-                            class="w-4 h-4"
-                        >
-                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                        </div>
                     </button>
                 </div>
             </div>
@@ -304,6 +327,10 @@ const handleSendMessage = async () => {
 const handleSuggestionClick = (suggestionText) => {
     store.setInputMessage(suggestionText)
     handleSendMessage()
+}
+
+const handleNewSearch = () => {
+    store.clear()
 }
 
 const scrollToBottom = async () => {
