@@ -6,7 +6,7 @@
             class="flex justify-end mb-4"
         >
             <div class="max-w-4xl">
-                <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4">
+                <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4 transform transition-all duration-200 hover:shadow-sm hover:scale-[1.01]">
                     <p class="text-gray-900 text-base leading-relaxed">
                         {{ message.content }}
                     </p>
@@ -46,7 +46,7 @@
                 <!-- Loading State -->
                 <div
                     v-if="message.loading"
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-4"
+                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-4 animate-pulse-subtle"
                 >
                     <div class="flex items-center space-x-3">
                         <div class="flex space-x-1">
@@ -67,7 +67,7 @@
                 <!-- Assistant Response Content -->
                 <div
                     v-else
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-5"
+                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-5 transform transition-all duration-200 hover:shadow-md hover:border-gray-300"
                 >
                     <div
                         v-if="getResponseType(message.results).includes('timelines')"
@@ -106,3 +106,20 @@ const formatTime = (timestamp) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 </script>
+
+<style scoped>
+@keyframes pulse-subtle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.95;
+        transform: scale(1.005);
+    }
+}
+
+.animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+</style>

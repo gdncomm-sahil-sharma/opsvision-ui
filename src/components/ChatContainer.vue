@@ -7,48 +7,188 @@
             ref="messagesContainer"
         >
             <!-- Welcome Message (when no messages) -->
-            <div
-                v-if="store.messages.length === 0"
-                class="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center"
+            <Transition
+                name="welcome-fade"
+                appear
             >
-                <div class="mb-12 mt-16">
-                    <div class="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg
-                            class="w-8 h-8 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">
-                        Welcome to OPSVISION
-                    </h2>
-                    <p class="text-gray-600 text-lg mb-8">
-                        Ask anything about your warehouse operations and get instant insights
-                    </p>
-                </div>
-
-                <!-- Sample Questions -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mb-12">
-                    <button
-                        v-for="suggestion in suggestions"
-                        :key="suggestion.id"
-                        @click="handleSuggestionClick(suggestion.text)"
-                        class="p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-left group"
+                <div
+                    v-if="store.messages.length === 0"
+                    class="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center"
+                >
+                    <Transition
+                        name="welcome-header"
+                        appear
                     >
-                        <div class="flex items-start space-x-3">
-                            <div
-                                class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                                :class="suggestion.iconBg"
+                        <div class="mb-12 mt-16">
+                            <div class="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <svg
+                                    class="w-8 h-8 text-white"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+                                Welcome to OPSVISION
+                            </h2>
+                            <p class="text-gray-600 text-lg mb-8">
+                                Ask anything about your warehouse operations and get instant insights
+                            </p>
+                        </div>
+                    </Transition>
+
+                    <!-- Sample Questions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl mb-12">
+                        <TransitionGroup
+                            name="suggestion-stagger"
+                            tag="div"
+                            class="contents"
+                            appear
+                        >
+                            <button
+                                v-for="suggestion in suggestions"
+                                :key="suggestion.id"
+                                @click="handleSuggestionClick(suggestion.text)"
+                                class="p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-md transition-all duration-300 text-left group transform hover:-translate-y-1"
+                            >
+                                <div class="flex items-start space-x-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                        :class="suggestion.iconBg"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            :class="suggestion.iconColor"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                :d="suggestion.iconPath"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900 group-hover:text-gray-700 mb-1">
+                                            {{ suggestion.title }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600 group-hover:text-gray-500">
+                                            {{ suggestion.text }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
+                        </TransitionGroup>
+                    </div>
+
+                    <!-- Centered Chat Input (when no messages) -->
+                    <Transition
+                        name="welcome-input"
+                        appear
+                    >
+                        <div class="w-full max-w-4xl mx-auto">
+                            <div class="relative flex items-center">
+                                <input
+                                    v-model="store.inputMessage"
+                                    type="text"
+                                    placeholder="Ask anything about your warehouse operations..."
+                                    class="w-full px-5 py-4 pr-14 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-lg text-lg transition-all duration-300 focus:shadow-xl focus:scale-[1.02]"
+                                    @keyup.enter="handleSendMessage"
+                                    :disabled="store.loading"
+                                />
+                                <button
+                                    @click="handleSendMessage"
+                                    :disabled="!store.inputMessage.trim() || store.loading"
+                                    class="absolute right-3 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                >
+                                    <svg
+                                        v-if="!store.loading"
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                        />
+                                    </svg>
+                                    <div
+                                        v-else
+                                        class="w-4 h-4"
+                                    >
+                                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+            </Transition>
+
+            <!-- Chat Messages -->
+            <Transition
+                name="chat-appear"
+                appear
+            >
+                <div
+                    v-if="store.messages.length > 0"
+                    class="max-w-4xl mx-auto space-y-1"
+                >
+                    <TransitionGroup
+                        name="message-slide"
+                        tag="div"
+                        class="space-y-1"
+                        appear
+                    >
+                        <ChatBubble
+                            v-for="message in store.messages"
+                            :key="message.id"
+                            :message="message"
+                        />
+                    </TransitionGroup>
+                </div>
+            </Transition>
+        </div>
+
+        <!-- Fixed Chat Input Area (when messages exist) -->
+        <Transition
+            name="input-slide-up"
+            appear
+        >
+            <div
+                v-if="store.messages.length > 0"
+                class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50"
+            >
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-stretch space-x-2">
+                        <div class="relative flex-1">
+                            <input
+                                v-model="store.inputMessage"
+                                type="text"
+                                placeholder="Ask anything about your warehouse operations..."
+                                class="w-full h-12 px-4 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm transition-all duration-200 focus:shadow-md"
+                                @keyup.enter="handleSendMessage"
+                                :disabled="store.loading"
+                            />
+                            <button
+                                @click="handleSendMessage"
+                                :disabled="!store.inputMessage.trim() || store.loading"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                             >
                                 <svg
+                                    v-if="!store.loading"
                                     class="w-4 h-4"
-                                    :class="suggestion.iconColor"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -57,41 +197,26 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        :d="suggestion.iconPath"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                                     />
                                 </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-medium text-gray-900 group-hover:text-gray-700 mb-1">
-                                    {{ suggestion.title }}
-                                </h3>
-                                <p class="text-sm text-gray-600 group-hover:text-gray-500">
-                                    {{ suggestion.text }}
-                                </p>
-                            </div>
+                                <div
+                                    v-else
+                                    class="w-4 h-4"
+                                >
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                </div>
+                            </button>
                         </div>
-                    </button>
-                </div>
 
-                <!-- Centered Chat Input (when no messages) -->
-                <div class="w-full max-w-4xl mx-auto">
-                    <div class="relative flex items-center">
-                        <input
-                            v-model="store.inputMessage"
-                            type="text"
-                            placeholder="Ask anything about your warehouse operations..."
-                            class="w-full px-5 py-4 pr-14 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-lg text-lg"
-                            @keyup.enter="handleSendMessage"
-                            :disabled="store.loading"
-                        />
+                        <!-- Start Over Button (Icon Only) -->
                         <button
-                            @click="handleSendMessage"
-                            :disabled="!store.inputMessage.trim() || store.loading"
-                            class="absolute right-3 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                            @click="handleNewSearch"
+                            class="flex items-center justify-center w-12 h-12 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 cursor-pointer border border-gray-300"
+                            title="Clear chat and start over"
                         >
                             <svg
-                                v-if="!store.loading"
-                                class="w-4 h-4"
+                                class="w-5 h-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -100,100 +225,14 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                 />
                             </svg>
-                            <div
-                                v-else
-                                class="w-4 h-4"
-                            >
-                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                            </div>
                         </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Chat Messages -->
-            <div
-                v-else
-                class="max-w-4xl mx-auto space-y-1"
-            >
-                <ChatBubble
-                    v-for="message in store.messages"
-                    :key="message.id"
-                    :message="message"
-                />
-            </div>
-        </div>
-
-        <!-- Fixed Chat Input Area (when messages exist) -->
-        <div
-            v-if="store.messages.length > 0"
-            class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50"
-        >
-            <div class="max-w-4xl mx-auto">
-                <div class="flex items-stretch space-x-2">
-                    <div class="relative flex-1">
-                        <input
-                            v-model="store.inputMessage"
-                            type="text"
-                            placeholder="Ask anything about your warehouse operations..."
-                            class="w-full h-12 px-4 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm"
-                            @keyup.enter="handleSendMessage"
-                            :disabled="store.loading"
-                        />
-                        <button
-                            @click="handleSendMessage"
-                            :disabled="!store.inputMessage.trim() || store.loading"
-                            class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                        >
-                            <svg
-                                v-if="!store.loading"
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                                />
-                            </svg>
-                            <div
-                                v-else
-                                class="w-4 h-4"
-                            >
-                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- Start Over Button (Icon Only) -->
-                    <button
-                        @click="handleNewSearch"
-                        class="flex items-center justify-center w-12 h-12 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 cursor-pointer border border-gray-300"
-                        title="Clear chat and start over"
-                    >
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+        </Transition>
     </div>
 </template>
 
@@ -341,3 +380,122 @@ const scrollToBottom = async () => {
 }
 
 </script>
+
+<style scoped>
+/* Welcome header animation */
+.welcome-header-enter-active {
+    transition: all 0.4s ease-out;
+}
+
+.welcome-header-enter-from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+}
+
+/* Welcome screen fade animation */
+.welcome-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.welcome-fade-leave-active {
+    transition: all 0.3s ease-in;
+}
+
+.welcome-fade-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+}
+
+.welcome-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+}
+
+/* Chat area appearance animation */
+.chat-appear-enter-active {
+    transition: all 0.4s ease-out 0.1s;
+}
+
+.chat-appear-enter-from {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* Individual message slide animations */
+.message-slide-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.message-slide-leave-active {
+    transition: all 0.2s ease-in;
+}
+
+.message-slide-enter-from {
+    opacity: 0;
+    transform: translateY(20px) translateX(-5px);
+}
+
+.message-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-5px) translateX(5px);
+}
+
+.message-slide-move {
+    transition: transform 0.2s ease-out;
+}
+
+/* Fixed input area slide up animation */
+.input-slide-up-enter-active {
+    transition: all 0.3s ease-out 0.15s;
+}
+
+.input-slide-up-leave-active {
+    transition: all 0.25s ease-in;
+}
+
+.input-slide-up-enter-from {
+    opacity: 0;
+    transform: translateY(100%);
+}
+
+.input-slide-up-leave-to {
+    opacity: 0;
+    transform: translateY(100%);
+}
+
+/* Suggestion staggered animation */
+.suggestion-stagger-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.suggestion-stagger-enter-from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.95);
+}
+
+/* Add staggered delays for each suggestion */
+.suggestion-stagger-enter-active:nth-child(1) { transition-delay: 0.05s; }
+.suggestion-stagger-enter-active:nth-child(2) { transition-delay: 0.1s; }
+.suggestion-stagger-enter-active:nth-child(3) { transition-delay: 0.15s; }
+.suggestion-stagger-enter-active:nth-child(4) { transition-delay: 0.2s; }
+
+/* Welcome input animation */
+.welcome-input-enter-active {
+    transition: all 0.4s ease-out 0.25s;
+}
+
+.welcome-input-enter-from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+}
+
+/* Smooth loading spinner animation enhancement */
+@keyframes smooth-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: smooth-spin 1s linear infinite;
+}
+</style>
