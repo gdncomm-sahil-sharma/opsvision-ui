@@ -2,7 +2,9 @@
 </script>
 
 <template>
-    <div>
-        <!-- Your app content goes here -->
-    </div>
+    <UApp>
+        <div>
+        <!-- TODO: Add your app content here -->
+        </div>
+    </UApp>
 </template>
