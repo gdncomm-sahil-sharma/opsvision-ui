@@ -22,7 +22,8 @@ export default [
                 global: 'readonly',
                 window: 'readonly',
                 document: 'readonly',
-                navigator: 'readonly'
+                navigator: 'readonly',
+                fetch: 'readonly'
             }
         }
     },

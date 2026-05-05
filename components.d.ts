@@ -20,5 +20,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     StatusBasedTimeline: typeof import('./src/components/StatusBasedTimeline.vue')['default']
     UApp: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/App.vue')['default']
+    UTimeline: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Timeline.vue')['default']
   }
 }

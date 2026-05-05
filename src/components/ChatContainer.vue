@@ -3,12 +3,12 @@
         <!-- Chat Messages Area -->
         <div
             class="flex-1 overflow-y-auto"
-            :class="messages.length === 0 ? 'px-6 py-4' : 'px-6 py-4 pb-32'"
+            :class="store.messages.length === 0 ? 'px-6 py-4' : 'px-6 py-4 pb-32'"
             ref="messagesContainer"
         >
             <!-- Welcome Message (when no messages) -->
             <div
-                v-if="messages.length === 0"
+                v-if="store.messages.length === 0"
                 class="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center"
             >
                 <div class="mb-12">
@@ -77,20 +77,20 @@
                 <div class="w-full max-w-4xl mx-auto">
                     <div class="relative flex items-center">
                         <input
-                            v-model="inputMessage"
+                            v-model="store.inputMessage"
                             type="text"
                             placeholder="Ask anything about your warehouse operations..."
                             class="w-full px-5 py-4 pr-14 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-lg text-lg"
                             @keyup.enter="handleSendMessage"
-                            :disabled="isLoading"
+                            :disabled="store.loading"
                         />
                         <button
                             @click="handleSendMessage"
-                            :disabled="!inputMessage.trim() || isLoading"
+                            :disabled="!store.inputMessage.trim() || store.loading"
                             class="absolute right-3 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                         >
                             <svg
-                                v-if="!isLoading"
+                                v-if="!store.loading"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -120,7 +120,7 @@
                 class="max-w-4xl mx-auto space-y-1"
             >
                 <ChatBubble
-                    v-for="message in messages"
+                    v-for="message in store.messages"
                     :key="message.id"
                     :message="message"
                 />
@@ -129,26 +129,26 @@
 
         <!-- Fixed Chat Input Area (when messages exist) -->
         <div
-            v-if="messages.length > 0"
+            v-if="store.messages.length > 0"
             class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50"
         >
             <div class="max-w-4xl mx-auto">
                 <div class="relative flex items-center">
                     <input
-                        v-model="inputMessage"
+                        v-model="store.inputMessage"
                         type="text"
                         placeholder="Ask anything about your warehouse operations..."
                         class="w-full px-4 py-3 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm"
                         @keyup.enter="handleSendMessage"
-                        :disabled="isLoading"
+                        :disabled="store.loading"
                     />
                     <button
                         @click="handleSendMessage"
-                        :disabled="!inputMessage.trim() || isLoading"
+                        :disabled="!store.inputMessage.trim() || store.loading"
                         class="absolute right-2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
                         <svg
-                            v-if="!isLoading"
+                            v-if="!store.loading"
                             class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
@@ -175,14 +175,15 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick } from 'vue'
 import ChatBubble from './ChatBubble.vue'
+import { useSearchStore } from '../stores/searchStore.js'
 
 // Reactive data
-const messages = ref([])
-const inputMessage = ref('')
-const isLoading = ref(false)
 const messagesContainer = ref(null)
+
+// Store
+const store = useSearchStore()
 
 // Sample suggestions
 const suggestions = ref([
@@ -222,17 +223,17 @@ const suggestions = ref([
 
 // Methods
 const handleSendMessage = async () => {
-    if (!inputMessage.value.trim() || isLoading.value) return
+    if (!store.inputMessage.trim() || store.loading) return
 
     const userMessage = {
         id: Date.now(),
         type: 'user',
-        content: inputMessage.value.trim(),
+        content: store.inputMessage.trim(),
         timestamp: new Date().toISOString()
     }
 
     // Add user message
-    messages.value.push(userMessage)
+    store.addMessage(userMessage)
 
     // Create loading assistant message
     const loadingMessage = {
@@ -242,83 +243,67 @@ const handleSendMessage = async () => {
         timestamp: new Date().toISOString()
     }
 
-    messages.value.push(loadingMessage)
+    store.addMessage(loadingMessage)
 
     // Clear input and scroll to bottom
-    const query = inputMessage.value.trim()
-    inputMessage.value = ''
-    isLoading.value = true
+    const query = store.inputMessage.trim()
+    store.clearInputMessage()
     await scrollToBottom()
 
-    // Simulate API call
-    setTimeout(() => {
-        // Remove loading message
-        messages.value = messages.value.filter(m => !m.loading)
+    try {
+        // Call the actual API through the store
+        console.log('🚀 Making API call for query:', query)
+        await store.search(query)
 
-        // Add assistant response
+        console.log('✅ API call completed. Results:', store.results)
+
+        // Remove loading message
+        store.removeLoadingMessages()
+
+        // Add assistant response based on API results - create independent copy
         const assistantMessage = {
             id: Date.now() + 2,
             type: 'assistant',
-            content: generateResponse(query),
-            results: generateResults(query),
+            query: query, // Store the original query
+            content: store.error
+                ? `Sorry, I encountered an error: ${store.error}`
+                : store.results?.response || `I've processed your query about "${query}" and retrieved the relevant data.`,
+            results: store.results ? JSON.parse(JSON.stringify(store.results)) : null, // Deep copy
             timestamp: new Date().toISOString()
         }
 
-        messages.value.push(assistantMessage)
-        isLoading.value = false
-        scrollToBottom()
-    }, 2000)
+        store.addMessage(assistantMessage)
+        console.log('✅ Message added with independent results:', {
+            messageId: assistantMessage.id,
+            query: assistantMessage.query,
+            hasResults: !!assistantMessage.results,
+            resultsTimestamp: assistantMessage.results?.timestamp
+        })
+        await scrollToBottom()
+
+    } catch (error) {
+        // Remove loading message
+        store.removeLoadingMessages()
+
+        // Add error message
+        const errorMessage = {
+            id: Date.now() + 2,
+            type: 'assistant',
+            query: query, // Store the original query
+            content: `Sorry, I encountered an error while processing your request: ${error.message}`,
+            error: error.message,
+            results: null,
+            timestamp: new Date().toISOString()
+        }
+
+        store.addMessage(errorMessage)
+        await scrollToBottom()
+    }
 }
 
 const handleSuggestionClick = (suggestionText) => {
-    inputMessage.value = suggestionText
+    store.setInputMessage(suggestionText)
     handleSendMessage()
-}
-
-const generateResponse = (query) => {
-    const lowerQuery = query.toLowerCase()
-
-    if (lowerQuery.includes('performance') || lowerQuery.includes('metrics')) {
-        return 'Here are your current warehouse performance metrics. Your picking rate is performing well above average, with excellent accuracy rates maintained throughout the day.'
-    } else if (lowerQuery.includes('order') || lowerQuery.includes('status')) {
-        return 'I\'ve analyzed your current order status. You have strong completion rates with most orders processing smoothly. There are a few orders in progress that are on track for timely completion.'
-    } else if (lowerQuery.includes('inventory') || lowerQuery.includes('stock')) {
-        return 'Your inventory levels are generally healthy. I\'ve identified some items that may need restocking soon. The system is efficiently tracking all inventory movements.'
-    } else if (lowerQuery.includes('alert') || lowerQuery.includes('issue') || lowerQuery.includes('problem')) {
-        return 'I\'ve found a few items that need attention. There are some minor SLA breaches and low inventory alerts that should be addressed soon to maintain optimal operations.'
-    } else {
-        return `I've analyzed your query about "${query}" and gathered the relevant operational data. Here are the key insights from your warehouse operations.`
-    }
-}
-
-const generateResults = (query) => {
-    const lowerQuery = query.toLowerCase()
-
-    const results = {}
-
-    if (lowerQuery.includes('performance') || lowerQuery.includes('metrics')) {
-        results.performance = true
-    }
-
-    if (lowerQuery.includes('order') || lowerQuery.includes('status')) {
-        results.orders = true
-    }
-
-    if (lowerQuery.includes('alert') || lowerQuery.includes('issue') || lowerQuery.includes('problem')) {
-        results.alerts = true
-    }
-
-    if (lowerQuery.includes('inventory') || lowerQuery.includes('stock')) {
-        results.inventory = true
-    }
-
-    // If no specific category, show performance and orders by default
-    if (Object.keys(results).length === 0) {
-        results.performance = true
-        results.orders = true
-    }
-
-    return results
 }
 
 const scrollToBottom = async () => {
@@ -328,14 +313,4 @@ const scrollToBottom = async () => {
     }
 }
 
-// Expose methods for parent component
-defineExpose({
-    addMessage: (message) => {
-        messages.value.push(message)
-        scrollToBottom()
-    },
-    clearMessages: () => {
-        messages.value = []
-    }
-})
 </script>

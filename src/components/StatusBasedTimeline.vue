@@ -8,6 +8,11 @@ const props = defineProps({
         type: Array,
         required: true,
         default: () => []
+    },
+    title: {
+        type: String,
+        required: true,
+        default: 'Order Timeline'
     }
 })
 
@@ -28,7 +33,7 @@ const processedItems = computed(() => {
                 indicator: 'bg-green-500 text-white'
             }
             break
-        case 'IN_PROGRESS':
+        case 'PENDING':
             statusColors = {
                 indicator: 'bg-blue-500 text-white'
             }
@@ -39,6 +44,11 @@ const processedItems = computed(() => {
             }
             break
         case 'NOT_STARTED':
+            statusColors = {
+                indicator: 'bg-gray-400 text-white'
+            }
+            break
+        case 'CANCELLED':
             statusColors = {
                 indicator: 'bg-gray-400 text-white'
             }
@@ -78,7 +88,7 @@ const getNumberIndicatorClass = (item) => {
     switch (originalItem?.status) {
     case 'COMPLETED':
         return 'bg-green-500'
-    case 'IN_PROGRESS':
+    case 'PENDING':
         return 'bg-blue-500'
     case 'FAILED':
         return 'bg-red-500'
@@ -100,7 +110,7 @@ const getNumberIndicatorClass = (item) => {
                 class="text-xl font-bold text-left"
                 :class="isDark ? 'text-white' : 'text-gray-900'"
             >
-                Project Timeline
+                {{ title }}
             </h3>
         </div>
 
@@ -246,74 +256,87 @@ const getNumberIndicatorClass = (item) => {
   color: var(--date-color) !important;
 }
 
+/* COMPLETED indicators - highest priority */
 .timeline-wrapper.item-0-COMPLETED .status-timeline .group:nth-child(1) .bg-primary,
-.timeline-wrapper.item-0-COMPLETED .status-timeline .group:nth-child(1) [class*="bg-"] {
+.timeline-wrapper.item-0-COMPLETED .status-timeline .group:nth-child(1) [class*="bg-"]:not([class*="timeline"]):not([class*="connector"]),
+.timeline-wrapper.item-0-COMPLETED .status-timeline .group:nth-child(1) .indicator-circle {
   background-color: #22c55e !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-1-COMPLETED .status-timeline .group:nth-child(2) .bg-primary,
-.timeline-wrapper.item-1-COMPLETED .status-timeline .group:nth-child(2) [class*="bg-"] {
+.timeline-wrapper.item-1-COMPLETED .status-timeline .group:nth-child(2) [class*="bg-"],
+.timeline-wrapper.item-1-COMPLETED .status-timeline .group:nth-child(2) .indicator-circle {
   background-color: #22c55e !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-2-COMPLETED .status-timeline .group:nth-child(3) .bg-primary,
-.timeline-wrapper.item-2-COMPLETED .status-timeline .group:nth-child(3) [class*="bg-"] {
+.timeline-wrapper.item-2-COMPLETED .status-timeline .group:nth-child(3) [class*="bg-"],
+.timeline-wrapper.item-2-COMPLETED .status-timeline .group:nth-child(3) .indicator-circle {
   background-color: #22c55e !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-3-COMPLETED .status-timeline .group:nth-child(4) .bg-primary,
-.timeline-wrapper.item-3-COMPLETED .status-timeline .group:nth-child(4) [class*="bg-"] {
+.timeline-wrapper.item-3-COMPLETED .status-timeline .group:nth-child(4) [class*="bg-"],
+.timeline-wrapper.item-3-COMPLETED .status-timeline .group:nth-child(4) .indicator-circle {
   background-color: #22c55e !important;
   color: white !important;
 }
 
-.timeline-wrapper.item-0-IN_PROGRESS .status-timeline .group:nth-child(1) .bg-primary,
-.timeline-wrapper.item-0-IN_PROGRESS .status-timeline .group:nth-child(1) [class*="bg-"] {
+.timeline-wrapper.item-0-PENDING .status-timeline .group:nth-child(1) .bg-primary,
+.timeline-wrapper.item-0-PENDING .status-timeline .group:nth-child(1) [class*="bg-"],
+.timeline-wrapper.item-0-PENDING .status-timeline .group:nth-child(1) .indicator-circle {
   background-color: #3b82f6 !important;
   color: white !important;
 }
 
-.timeline-wrapper.item-1-IN_PROGRESS .status-timeline .group:nth-child(2) .bg-primary,
-.timeline-wrapper.item-1-IN_PROGRESS .status-timeline .group:nth-child(2) [class*="bg-"] {
+.timeline-wrapper.item-1-PENDING .status-timeline .group:nth-child(2) .bg-primary,
+.timeline-wrapper.item-1-PENDING .status-timeline .group:nth-child(2) [class*="bg-"],
+.timeline-wrapper.item-1-PENDING .status-timeline .group:nth-child(2) .indicator-circle {
   background-color: #3b82f6 !important;
   color: white !important;
 }
 
-.timeline-wrapper.item-2-IN_PROGRESS .status-timeline .group:nth-child(3) .bg-primary,
-.timeline-wrapper.item-2-IN_PROGRESS .status-timeline .group:nth-child(3) [class*="bg-"] {
+.timeline-wrapper.item-2-PENDING .status-timeline .group:nth-child(3) .bg-primary,
+.timeline-wrapper.item-2-PENDING .status-timeline .group:nth-child(3) [class*="bg-"],
+.timeline-wrapper.item-2-PENDING .status-timeline .group:nth-child(3) .indicator-circle {
   background-color: #3b82f6 !important;
   color: white !important;
 }
 
-.timeline-wrapper.item-3-IN_PROGRESS .status-timeline .group:nth-child(4) .bg-primary,
-.timeline-wrapper.item-3-IN_PROGRESS .status-timeline .group:nth-child(4) [class*="bg-"] {
+.timeline-wrapper.item-3-PENDING .status-timeline .group:nth-child(4) .bg-primary,
+.timeline-wrapper.item-3-PENDING .status-timeline .group:nth-child(4) [class*="bg-"],
+.timeline-wrapper.item-3-PENDING .status-timeline .group:nth-child(4) .indicator-circle {
   background-color: #3b82f6 !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-0-FAILED .status-timeline .group:nth-child(1) .bg-primary,
-.timeline-wrapper.item-0-FAILED .status-timeline .group:nth-child(1) [class*="bg-"] {
+.timeline-wrapper.item-0-FAILED .status-timeline .group:nth-child(1) [class*="bg-"],
+.timeline-wrapper.item-0-FAILED .status-timeline .group:nth-child(1) .indicator-circle {
   background-color: #ef4444 !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-1-FAILED .status-timeline .group:nth-child(2) .bg-primary,
-.timeline-wrapper.item-1-FAILED .status-timeline .group:nth-child(2) [class*="bg-"] {
+.timeline-wrapper.item-1-FAILED .status-timeline .group:nth-child(2) [class*="bg-"],
+.timeline-wrapper.item-1-FAILED .status-timeline .group:nth-child(2) .indicator-circle {
   background-color: #ef4444 !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-2-FAILED .status-timeline .group:nth-child(3) .bg-primary,
-.timeline-wrapper.item-2-FAILED .status-timeline .group:nth-child(3) [class*="bg-"] {
+.timeline-wrapper.item-2-FAILED .status-timeline .group:nth-child(3) [class*="bg-"],
+.timeline-wrapper.item-2-FAILED .status-timeline .group:nth-child(3) .indicator-circle {
   background-color: #ef4444 !important;
   color: white !important;
 }
 
 .timeline-wrapper.item-3-FAILED .status-timeline .group:nth-child(4) .bg-primary,
-.timeline-wrapper.item-3-FAILED .status-timeline .group:nth-child(4) [class*="bg-"] {
+.timeline-wrapper.item-3-FAILED .status-timeline .group:nth-child(4) [class*="bg-"],
+.timeline-wrapper.item-3-FAILED .status-timeline .group:nth-child(4) .indicator-circle {
   background-color: #ef4444 !important;
   color: white !important;
 }
@@ -354,22 +377,355 @@ const getNumberIndicatorClass = (item) => {
   }
 }
 
-.timeline-wrapper.item-0-IN_PROGRESS .status-timeline .group:nth-child(1) .indicator-circle {
+.timeline-wrapper.item-0-PENDING .status-timeline .group:nth-child(1) .indicator-circle {
   animation: pulse 2s infinite;
   border-radius: 50%;
 }
 
-.timeline-wrapper.item-1-IN_PROGRESS .status-timeline .group:nth-child(2) .indicator-circle {
+.timeline-wrapper.item-1-PENDING .status-timeline .group:nth-child(2) .indicator-circle {
   animation: pulse 2s infinite;
   border-radius: 50%;
 }
 
-.timeline-wrapper.item-2-IN_PROGRESS .status-timeline .group:nth-child(3) .indicator-circle {
+.timeline-wrapper.item-2-PENDING .status-timeline .group:nth-child(3) .indicator-circle {
   animation: pulse 2s infinite;
   border-radius: 50%;
 }
 
-.timeline-wrapper.item-3-IN_PROGRESS .status-timeline .group:nth-child(4) .indicator-circle {
+.timeline-wrapper.item-3-PENDING .status-timeline .group:nth-child(4) .indicator-circle {
+  animation: pulse 2s infinite;
+  border-radius: 50%;
+}
+
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .indicator-circle {
+  animation: pulse 2s infinite;
+  border-radius: 50%;
+}
+
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .indicator-circle {
+  animation: pulse 2s infinite;
+  border-radius: 50%;
+}
+
+/* Add CSS for items 4 and 5 - COMPLETED */
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) .indicator-circle {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) .indicator-circle {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+/* Add CSS for items 4 and 5 - PENDING */
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .indicator-circle {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .indicator-circle {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Add CSS for items 4 and 5 - FAILED */
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) .indicator-circle {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) .indicator-circle {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* Add CSS for items 4 and 5 - NOT_STARTED */
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) .indicator-circle {
+  background-color: #9ca3af !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) .indicator-circle {
+  background-color: #9ca3af !important;
+  color: white !important;
+}
+
+/* Add CSS for items 4 and 5 - CANCELLED */
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) .indicator-circle {
+  background-color: #9ca3af !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) .indicator-circle {
+  background-color: #9ca3af !important;
+  color: white !important;
+}
+
+/* Make all connecting lines grey */
+.status-timeline :deep(.border-primary) {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep([class*="border-"]) {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.bg-primary) {
+  background-color: #9ca3af !important;
+}
+
+.status-timeline :deep([class*="bg-primary"]) {
+  background-color: #9ca3af !important;
+}
+
+/* Override UTimeline default line colors - comprehensive approach */
+.status-timeline :deep(.divide-y > *::before),
+.status-timeline :deep(.divide-y > *::after) {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.group::before),
+.status-timeline :deep(.group::after) {
+  border-color: #9ca3af !important;
+  background-color: #9ca3af !important;
+}
+
+/* Target all possible timeline line elements */
+.status-timeline :deep(.border-l),
+.status-timeline :deep(.border-l-2),
+.status-timeline :deep(.border-l-4) {
+  border-left-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.bg-blue-500),
+.status-timeline :deep(.bg-blue-600),
+.status-timeline :deep(.bg-primary-500) {
+  background-color: #9ca3af !important;
+}
+
+/* Force override any timeline connector */
+.status-timeline :deep([class*="timeline"]) [class*="border"] {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep([class*="timeline"]) [class*="bg-"] {
+  background-color: #9ca3af !important;
+}
+
+/* Specific UTimeline line overrides */
+.status-timeline :deep(.ui-timeline-item::before) {
+  background-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.ui-timeline-connector) {
+  background-color: #9ca3af !important;
+  border-color: #9ca3af !important;
+}
+
+/* Nuclear option - force ALL background colors except indicators to grey */
+.status-timeline :deep(*:not(.indicator-circle):not([class*="indicator"])) {
+  border-left-color: #9ca3af !important;
+  border-right-color: #9ca3af !important;
+  border-top-color: #9ca3af !important;
+  border-bottom-color: #9ca3af !important;
+}
+
+/* Override any blue backgrounds that aren't indicators */
+.status-timeline :deep(*:not(.indicator-circle)) [class*="bg-blue"],
+.status-timeline :deep(*:not(.indicator-circle)) [class*="bg-primary"] {
+  background-color: #9ca3af !important;
+}
+
+/* Try targeting UTimeline specific classes */
+.status-timeline :deep(.relative) {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.absolute) {
+  background-color: #9ca3af !important;
+  border-color: #9ca3af !important;
+}
+
+/* Force override with maximum specificity */
+.timeline-wrapper .status-timeline :deep(.group) .relative {
+  border-left: 2px solid #9ca3af !important;
+}
+
+.timeline-wrapper .status-timeline :deep(.group) .absolute {
+  background-color: #9ca3af !important;
+}
+
+/* UUI Timeline specific overrides */
+.status-timeline :deep(.group .relative::before),
+.status-timeline :deep(.group .relative::after) {
+  background-color: #9ca3af !important;
+  border-color: #9ca3af !important;
+}
+
+/* Very aggressive approach - set all borders to grey */
+.status-timeline :deep(*) {
+  border-left-color: #9ca3af !important;
+}
+
+.status-timeline :deep(.border-l-2) {
+  border-left: 2px solid #9ca3af !important;
+}
+
+/* CSS Variables approach */
+.status-timeline {
+  --ui-primary: #9ca3af;
+  --primary-500: #9ca3af;
+  --blue-500: #9ca3af;
+}
+
+/* UUI specific timeline line override */
+.status-timeline :deep(.ui-timeline) .group .relative {
+  border-left-color: #9ca3af !important;
+}
+
+/* Final nuclear option - use inline style approach */
+.status-timeline :deep([style*="border"]) {
+  border-color: #9ca3af !important;
+}
+
+.status-timeline :deep([style*="background"]):not(.indicator-circle) {
+  background-color: #9ca3af !important;
+}
+
+/* Extended hardcoded CSS for items 4-9 */
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-COMPLETED .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-COMPLETED .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-6-COMPLETED .status-timeline .group:nth-child(7) .bg-primary,
+.timeline-wrapper.item-6-COMPLETED .status-timeline .group:nth-child(7) [class*="bg-"],
+.timeline-wrapper.item-6-COMPLETED .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-7-COMPLETED .status-timeline .group:nth-child(8) .bg-primary,
+.timeline-wrapper.item-7-COMPLETED .status-timeline .group:nth-child(8) [class*="bg-"],
+.timeline-wrapper.item-7-COMPLETED .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-8-COMPLETED .status-timeline .group:nth-child(9) .bg-primary,
+.timeline-wrapper.item-8-COMPLETED .status-timeline .group:nth-child(9) [class*="bg-"],
+.timeline-wrapper.item-8-COMPLETED .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-9-COMPLETED .status-timeline .group:nth-child(10) .bg-primary,
+.timeline-wrapper.item-9-COMPLETED .status-timeline .group:nth-child(10) [class*="bg-"],
+.timeline-wrapper.item-9-COMPLETED .status-timeline .group:nth-child(10) .indicator-circle {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-6-PENDING .status-timeline .group:nth-child(7) .bg-primary,
+.timeline-wrapper.item-6-PENDING .status-timeline .group:nth-child(7) [class*="bg-"],
+.timeline-wrapper.item-6-PENDING .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-7-PENDING .status-timeline .group:nth-child(8) .bg-primary,
+.timeline-wrapper.item-7-PENDING .status-timeline .group:nth-child(8) [class*="bg-"],
+.timeline-wrapper.item-7-PENDING .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-8-PENDING .status-timeline .group:nth-child(9) .bg-primary,
+.timeline-wrapper.item-8-PENDING .status-timeline .group:nth-child(9) [class*="bg-"],
+.timeline-wrapper.item-8-PENDING .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-9-PENDING .status-timeline .group:nth-child(10) .bg-primary,
+.timeline-wrapper.item-9-PENDING .status-timeline .group:nth-child(10) [class*="bg-"],
+.timeline-wrapper.item-9-PENDING .status-timeline .group:nth-child(10) .indicator-circle {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-FAILED .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-FAILED .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-6-FAILED .status-timeline .group:nth-child(7) .bg-primary,
+.timeline-wrapper.item-6-FAILED .status-timeline .group:nth-child(7) [class*="bg-"],
+.timeline-wrapper.item-6-FAILED .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-7-FAILED .status-timeline .group:nth-child(8) .bg-primary,
+.timeline-wrapper.item-7-FAILED .status-timeline .group:nth-child(8) [class*="bg-"],
+.timeline-wrapper.item-7-FAILED .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-8-FAILED .status-timeline .group:nth-child(9) .bg-primary,
+.timeline-wrapper.item-8-FAILED .status-timeline .group:nth-child(9) [class*="bg-"],
+.timeline-wrapper.item-8-FAILED .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-9-FAILED .status-timeline .group:nth-child(10) .bg-primary,
+.timeline-wrapper.item-9-FAILED .status-timeline .group:nth-child(10) [class*="bg-"],
+.timeline-wrapper.item-9-FAILED .status-timeline .group:nth-child(10) .indicator-circle {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-NOT_STARTED .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) .bg-primary,
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) [class*="bg-"],
+.timeline-wrapper.item-4-CANCELLED .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-NOT_STARTED .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) .bg-primary,
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) [class*="bg-"],
+.timeline-wrapper.item-5-CANCELLED .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-6-NOT_STARTED .status-timeline .group:nth-child(7) .bg-primary,
+.timeline-wrapper.item-6-NOT_STARTED .status-timeline .group:nth-child(7) [class*="bg-"],
+.timeline-wrapper.item-6-NOT_STARTED .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-6-CANCELLED .status-timeline .group:nth-child(7) .bg-primary,
+.timeline-wrapper.item-6-CANCELLED .status-timeline .group:nth-child(7) [class*="bg-"],
+.timeline-wrapper.item-6-CANCELLED .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-7-NOT_STARTED .status-timeline .group:nth-child(8) .bg-primary,
+.timeline-wrapper.item-7-NOT_STARTED .status-timeline .group:nth-child(8) [class*="bg-"],
+.timeline-wrapper.item-7-NOT_STARTED .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-7-CANCELLED .status-timeline .group:nth-child(8) .bg-primary,
+.timeline-wrapper.item-7-CANCELLED .status-timeline .group:nth-child(8) [class*="bg-"],
+.timeline-wrapper.item-7-CANCELLED .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-8-NOT_STARTED .status-timeline .group:nth-child(9) .bg-primary,
+.timeline-wrapper.item-8-NOT_STARTED .status-timeline .group:nth-child(9) [class*="bg-"],
+.timeline-wrapper.item-8-NOT_STARTED .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-8-CANCELLED .status-timeline .group:nth-child(9) .bg-primary,
+.timeline-wrapper.item-8-CANCELLED .status-timeline .group:nth-child(9) [class*="bg-"],
+.timeline-wrapper.item-8-CANCELLED .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-9-NOT_STARTED .status-timeline .group:nth-child(10) .bg-primary,
+.timeline-wrapper.item-9-NOT_STARTED .status-timeline .group:nth-child(10) [class*="bg-"],
+.timeline-wrapper.item-9-NOT_STARTED .status-timeline .group:nth-child(10) .indicator-circle,
+.timeline-wrapper.item-9-CANCELLED .status-timeline .group:nth-child(10) .bg-primary,
+.timeline-wrapper.item-9-CANCELLED .status-timeline .group:nth-child(10) [class*="bg-"],
+.timeline-wrapper.item-9-CANCELLED .status-timeline .group:nth-child(10) .indicator-circle {
+  background-color: #9ca3af !important;
+  color: white !important;
+}
+
+.timeline-wrapper.item-4-PENDING .status-timeline .group:nth-child(5) .indicator-circle,
+.timeline-wrapper.item-5-PENDING .status-timeline .group:nth-child(6) .indicator-circle,
+.timeline-wrapper.item-6-PENDING .status-timeline .group:nth-child(7) .indicator-circle,
+.timeline-wrapper.item-7-PENDING .status-timeline .group:nth-child(8) .indicator-circle,
+.timeline-wrapper.item-8-PENDING .status-timeline .group:nth-child(9) .indicator-circle,
+.timeline-wrapper.item-9-PENDING .status-timeline .group:nth-child(10) .indicator-circle {
   animation: pulse 2s infinite;
   border-radius: 50%;
 }
