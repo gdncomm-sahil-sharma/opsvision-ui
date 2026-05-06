@@ -2,7 +2,7 @@
     <div class="w-full">
         <!-- Header with AI icon -->
         <div class="flex items-center gap-3 pb-3 mb-4 border-b border-gray-200/40 dark:border-gray-700/40">
-            <span class="text-sm font-semibold text-gray-900 flex-1 dark:text-gray-100">AI Response</span>
+            <span class="text-sm font-semibold text-slate-900 flex-1">AI Response</span>
             <button
                 v-if="showCopyButton"
                 class="p-1 rounded text-gray-500 cursor-pointer dark:text-gray-400 transition-colors duration-300"
@@ -27,7 +27,7 @@
                         :fill="justCopied ? 'currentColor' : 'none'"
                         class="transition-all duration-300"
                     />
-                    
+
                     <!-- Copy lines (hidden when copied) -->
                     <path
                         v-if="!justCopied"
@@ -37,7 +37,7 @@
                         class="transition-opacity duration-300"
                         style="opacity: 1"
                     />
-                    
+
                     <!-- Checkmark (shown when copied, positioned inside the main box) -->
                     <path
                         v-if="justCopied"
@@ -59,13 +59,13 @@
             <div class="mb-6">
                 <p
                     v-if="!animateText"
-                    class="text-[15px] leading-relaxed text-gray-900 m-0 font-normal dark:text-gray-100"
+                    class="text-[15px] leading-relaxed text-slate-900 m-0 font-medium"
                 >
                     {{ data.summary }}
                 </p>
                 <p
                     v-else
-                    class="text-[15px] leading-relaxed text-gray-900 m-0 font-normal dark:text-gray-100"
+                    class="text-[15px] leading-relaxed text-slate-900 m-0 font-medium"
                 >
                     {{ displayedText }}
                 </p>
@@ -86,7 +86,7 @@
                     <div class="relative w-1.5 h-1.5 mt-2.5 flex-shrink-0">
                         <div class="w-full h-full bg-gray-400/70 rounded-full dark:bg-gray-500/60" />
                     </div>
-                    <span class="text-sm leading-relaxed text-gray-800 font-normal dark:text-gray-200">{{ point }}</span>
+                    <span class="text-sm leading-relaxed text-slate-800 font-medium">{{ point }}</span>
                 </div>
             </div>
         </div>
@@ -197,7 +197,7 @@ const copyToClipboard = async () => {
         await window.navigator.clipboard.writeText(textToCopy)
         justCopied.value = true
         emit('copy', textToCopy)
-        
+
         // Reset to copy icon after 2 seconds
         setTimeout(() => {
             justCopied.value = false

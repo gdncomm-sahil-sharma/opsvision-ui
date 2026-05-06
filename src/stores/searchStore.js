@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { searchApi } from '../api.js'
+import { chatApi } from '../api.js'
 
 export const useSearchStore = defineStore('search', {
     state: () => ({
@@ -46,9 +46,8 @@ export const useSearchStore = defineStore('search', {
             this.results = null  // 🔥 Clear previous results first
 
             try {
-                const response = await searchApi(query)
+                const response = await chatApi(query)
                 this.results = response
-                console.log('🔄 New API response received:', response)
             } catch (error) {
                 this.error = error.message || 'Search failed'
                 this.results = null
