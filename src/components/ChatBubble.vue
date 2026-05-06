@@ -3,7 +3,7 @@
         <!-- User Message -->
         <div
             v-if="message.type === 'user'"
-            class="flex justify-end mb-4"
+            class="flex justify-end mb-4 first:mt-0"
         >
             <div class="max-w-4xl">
                 <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4">
@@ -20,7 +20,7 @@
         <!-- Assistant Message -->
         <div
             v-else
-            class="flex justify-start mb-6"
+            class="flex justify-start mb-6 first:mt-0"
         >
             <div class="max-w-6xl">
                 <!-- Assistant Avatar -->
@@ -97,6 +97,24 @@
                             :timelineData="message.results.data.timelines.data"
                         />
                     </div>
+
+                    <!-- Separator line between timeline and table -->
+                    <div
+                        v-if="getResponseType(message.results).includes('timelines') && getResponseType(message.results).includes('table')"
+                        class="border-t border-gray-100"
+                    />
+
+                    <div
+                        v-if="getResponseType(message.results).includes('table')"
+                        class="px-6 py-5"
+                    >
+                        <DataTable
+                            :title="message.results.data.table.title"
+                            :headers="message.results.data.table.headers"
+                            :data="message.results.data.table.data"
+                            :itemsPerPage="5"
+                        />
+                    </div>
                 </div>
 
                 <div class="mt-1">
@@ -112,6 +130,7 @@ import { defineProps } from 'vue'
 import { getResponseType } from '../utils/responseHelper.js'
 import StatusBasedTimeline from './StatusBasedTimeline.vue'
 import AIBulletin from './AIBulletin.vue'
+import DataTable from './DataTable.vue'
 
 defineProps({
     message: {
