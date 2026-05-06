@@ -22,7 +22,7 @@
             v-else
             class="flex justify-start mb-6 first:mt-0"
         >
-            <div class="max-w-6xl">
+            <div class="max-w-4xl overflow-hidden">
                 <!-- Assistant Avatar -->
                 <div class="flex items-start space-x-4 mb-2">
                     <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
@@ -64,7 +64,7 @@
                 <!-- Assistant Response Content -->
                 <div
                     v-else
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md"
+                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md w-full max-w-full overflow-hidden"
                 >
                     <!-- Text Response Section -->
                     <div
@@ -106,7 +106,7 @@
 
                     <div
                         v-if="getResponseType(message.results).includes('table')"
-                        class="px-6 py-5"
+                        class="px-6 py-5 w-full max-w-full overflow-hidden"
                     >
                         <DataTable
                             :title="message.results.data.table.title"
