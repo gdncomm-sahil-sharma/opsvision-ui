@@ -6,13 +6,24 @@
             class="flex justify-end mb-4 first:mt-0"
         >
             <div class="max-w-4xl">
-                <div class="bg-gray-100 rounded-2xl rounded-tr-md px-6 py-4">
-                    <p class="text-gray-900 text-base leading-relaxed">
+                <div
+                    class="rounded-2xl rounded-tr-md px-6 py-4"
+                    :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-100'"
+                >
+                    <p
+                        class="text-base leading-relaxed"
+                        :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+                    >
                         {{ message.content }}
                     </p>
                 </div>
                 <div class="text-right mt-1">
-                    <span class="text-xs text-gray-400">{{ formatTime(message.timestamp) }}</span>
+                    <span
+                        class="text-xs"
+                        :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-400'"
+                    >
+                        {{ formatTime(message.timestamp) }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -25,7 +36,10 @@
             <div class="max-w-4xl overflow-hidden">
                 <!-- Assistant Avatar -->
                 <div class="flex items-start space-x-4 mb-2">
-                    <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
+                    <div
+                        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-800'"
+                    >
                         <svg
                             class="w-5 h-5 text-white"
                             fill="currentColor"
@@ -43,28 +57,40 @@
                 <!-- Loading State -->
                 <div
                     v-if="message.loading"
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-6 py-4 animate-pulse-subtle"
+                    class="border rounded-2xl rounded-tl-md px-6 py-4 animate-pulse-subtle"
+                    :class="themeStore.isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'"
                 >
                     <div class="flex items-center space-x-3">
                         <div class="flex space-x-1">
-                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
                             <div
-                                class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                                class="w-2 h-2 rounded-full animate-pulse"
+                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
+                            />
+                            <div
+                                class="w-2 h-2 rounded-full animate-pulse"
+                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
                                 style="animation-delay: 0.2s"
                             />
                             <div
-                                class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                                class="w-2 h-2 rounded-full animate-pulse"
+                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
                                 style="animation-delay: 0.4s"
                             />
                         </div>
-                        <span class="text-gray-500 text-sm">Analyzing your query...</span>
+                        <span
+                            class="text-sm"
+                            :class="themeStore.isDark ? 'text-slate-300' : 'text-gray-500'"
+                        >
+                            Analyzing your query...
+                        </span>
                     </div>
                 </div>
 
                 <!-- Assistant Response Content -->
                 <div
                     v-else
-                    class="bg-white border border-gray-200 rounded-2xl rounded-tl-md w-full max-w-full overflow-hidden"
+                    class="border rounded-2xl rounded-tl-md w-full max-w-full overflow-hidden"
+                    :class="themeStore.isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'"
                 >
                     <!-- Error Message Section -->
                     <div
@@ -73,7 +99,10 @@
                     >
                         <div class="flex items-start justify-between">
                             <div class="flex items-start space-x-3 flex-1">
-                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+                                <div
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                    :class="themeStore.isDark ? 'bg-red-900/30' : 'bg-red-100'"
+                                >
                                     <svg
                                         class="w-5 h-5 text-red-600"
                                         fill="none"
@@ -89,14 +118,20 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-gray-900 text-base leading-relaxed">
+                                    <p
+                                        class="text-base leading-relaxed"
+                                        :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+                                    >
                                         {{ message.content }}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 @click="retryQuery(message.query)"
-                                class="ml-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                                class="ml-3 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                :class="themeStore.isDark
+                                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700 focus:ring-slate-400'
+                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:ring-gray-400'"
                                 title="Retry request"
                             >
                                 <svg
@@ -134,7 +169,8 @@
                     <!-- Subtle separator line -->
                     <div
                         v-if="getResponseType(message.results).includes('text') && getResponseType(message.results).includes('timelines')"
-                        class="border-t border-gray-100"
+                        class="border-t"
+                        :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
 
                     <!-- Timeline Section -->
@@ -151,7 +187,8 @@
                     <!-- Separator line between timeline and table -->
                     <div
                         v-if="getResponseType(message.results).includes('timelines') && getResponseType(message.results).includes('table')"
-                        class="border-t border-gray-100"
+                        class="border-t"
+                        :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
 
                     <div
@@ -168,7 +205,12 @@
                 </div>
 
                 <div class="mt-1">
-                    <span class="text-xs text-gray-400">{{ formatTime(message.timestamp) }}</span>
+                    <span
+                        class="text-xs"
+                        :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-400'"
+                    >
+                        {{ formatTime(message.timestamp) }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -181,6 +223,7 @@ import { getResponseType } from '../utils/responseHelper.js'
 import StatusBasedTimeline from './StatusBasedTimeline.vue'
 import AIBulletin from './AIBulletin.vue'
 import DataTable from './DataTable.vue'
+import { useThemeStore } from '../stores/theme.js'
 
 defineProps({
     message: {
@@ -190,6 +233,7 @@ defineProps({
 })
 
 const emit = defineEmits(['retry-query'])
+const themeStore = useThemeStore()
 
 const formatTime = (timestamp) => {
     if (!timestamp) return ''

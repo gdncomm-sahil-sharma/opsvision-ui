@@ -1,8 +1,10 @@
 <script setup>
 import { ref, provide } from 'vue'
 import Sidebar from './components/Sidebar.vue'
+import { useThemeStore } from './stores/theme.js'
 
 const isCollapsed = ref(false)
+const themeStore = useThemeStore()
 
 // Provide the collapsed state to child components
 provide('sidebarCollapsed', isCollapsed)
@@ -13,7 +15,12 @@ const handleSidebarToggle = (collapsed) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div
+        :class="[
+            'min-h-screen',
+            themeStore.isDark ? 'bg-slate-900' : 'bg-gray-50'
+        ]"
+    >
         <!-- Sidebar -->
         <Sidebar @toggle="handleSidebarToggle" />
 
@@ -21,7 +28,8 @@ const handleSidebarToggle = (collapsed) => {
         <div
             :class="[
                 'transition-all duration-300 ease-in-out min-h-screen',
-                isCollapsed ? 'ml-16' : 'ml-64'
+                isCollapsed ? 'ml-16' : 'ml-64',
+                themeStore.isDark ? 'bg-slate-900' : 'bg-gray-50'
             ]"
         >
             <router-view />

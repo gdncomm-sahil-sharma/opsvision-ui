@@ -17,7 +17,6 @@ const props = defineProps({
 })
 
 const themeStore = useThemeStore()
-const { isDark } = themeStore
 
 const formatDate = (epochTimestamp) => {
     return moment(epochTimestamp).format('MMM D, YYYY')
@@ -65,10 +64,10 @@ const processedItems = computed(() => {
             value: index,
             ui: {
                 ...statusColors,
-                wrapper: isDark.value ? 'text-white' : '',
-                title: isDark.value ? 'text-white font-semibold' : 'font-semibold',
-                description: isDark.value ? 'text-zinc-400' : 'text-gray-600',
-                date: isDark.value ? 'text-zinc-400' : 'text-gray-500'
+                wrapper: themeStore.isDark ? 'text-white' : '',
+                title: themeStore.isDark ? 'text-white font-semibold' : 'font-semibold',
+                description: themeStore.isDark ? 'text-zinc-400' : 'text-gray-600',
+                date: themeStore.isDark ? 'text-zinc-400' : 'text-gray-500'
             }
         }
     })
@@ -102,22 +101,22 @@ const getNumberIndicatorClass = (item) => {
 const getStatusBadgeClass = (status) => {
     switch (status) {
     case 'COMPLETED':
-        return isDark.value ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-800'
+        return themeStore.isDark ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-800'
     case 'PENDING':
-        return isDark.value ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-800'
+        return themeStore.isDark ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-800'
     case 'FAILED':
-        return isDark.value ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-800'
+        return themeStore.isDark ? 'bg-red-900/20 text-red-400' : 'bg-red-100 text-red-800'
     case 'NOT_STARTED':
-        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+        return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
     case 'CANCELLED':
-        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+        return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
     default:
-        return isDark.value ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
+        return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'
     }
 }
 
 const getInlineStatusStyle = (status) => {
-    if (isDark.value) {
+    if (themeStore.isDark) {
         switch (status) {
         case 'COMPLETED':
             return 'background-color: rgba(20, 83, 45, 0.2) !important; color: #4ade80 !important;'
@@ -153,12 +152,22 @@ const getInlineStatusStyle = (status) => {
     <div class="w-full">
         <div class="mb-6">
             <div class="flex items-center gap-3 pb-3">
-                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                    class="w-5 h-5 text-gray-600 dark:text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                 </svg>
                 <h3
                     class="text-lg font-semibold text-left"
-                    :class="isDark ? 'text-white' : 'text-gray-900'"
+                    :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
                 >
                     {{ title }}
                 </h3>
@@ -167,14 +176,14 @@ const getInlineStatusStyle = (status) => {
 
         <div
             class="timeline-wrapper left-align-wrapper"
-            :class="[getTimelineClasses(), { 'dark-timeline': isDark }]"
-            :style="isDark ? 'color: #ffffff !important;' : ''"
+            :class="[getTimelineClasses(), { 'dark-timeline': themeStore.isDark }]"
+            :style="themeStore.isDark ? 'color: #ffffff !important;' : ''"
         >
             <UTimeline
                 :items="processedItems"
                 :default-value="1"
                 class="status-timeline compact-timeline"
-                :style="isDark ? 'color: #ffffff !important;' : ''"
+                :style="themeStore.isDark ? 'color: #ffffff !important;' : ''"
             >
                 <template #indicator="{ item }">
                     <div
@@ -182,16 +191,49 @@ const getInlineStatusStyle = (status) => {
                         :class="getNumberIndicatorClass(item)"
                     >
                         <!-- Completed -->
-                        <svg v-if="item.status === 'COMPLETED'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        <svg
+                            v-if="item.status === 'COMPLETED'"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
                         </svg>
                         <!-- Failed -->
-                        <svg v-else-if="item.status === 'FAILED'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                            v-else-if="item.status === 'FAILED'"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                         <!-- In Progress/Pending (Clock with spinning animation) -->
-                        <svg v-else-if="item.status === 'PENDING' || item.status === 'IN_PROGRESS'" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                            v-else-if="item.status === 'PENDING' || item.status === 'IN_PROGRESS'"
+                            class="w-4 h-4 animate-spin"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                         </svg>
                         <!-- Default number -->
                         <span v-else>{{ getItemNumber(item) }}</span>
@@ -199,14 +241,20 @@ const getInlineStatusStyle = (status) => {
                 </template>
 
                 <template #title="{ item }">
-                    <span class="font-semibold" :class="isDark ? 'text-white' : 'text-gray-900'">
+                    <span
+                        class="font-semibold"
+                        :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+                    >
                         {{ item.title }}
                     </span>
                 </template>
 
                 <template #date="{ item }">
                     <div class="flex items-center justify-between w-full">
-                        <span class="text-xs" :class="isDark ? 'text-gray-300' : 'text-gray-500'">
+                        <span
+                            class="text-xs"
+                            :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-500'"
+                        >
                             {{ item.date }}
                         </span>
                         <span

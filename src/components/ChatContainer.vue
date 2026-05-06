@@ -4,10 +4,12 @@
         <Transition name="fade">
             <div
                 v-if="store.messages.length > 0 && isScrolling"
-                class="absolute top-0 left-0 right-0 h-1 bg-gray-200 z-10"
+                class="absolute top-0 left-0 right-0 h-1 z-10"
+                :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-200'"
             >
                 <div
-                    class="h-full bg-gray-800 transition-all duration-150 ease-out"
+                    class="h-full transition-all duration-150 ease-out"
+                    :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-800'"
                     :style="{ width: `${scrollProgress}%` }"
                 />
             </div>
@@ -46,10 +48,16 @@
                                     />
                                 </svg>
                             </div>
-                            <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+                            <h2
+                                class="text-2xl font-semibold mb-2"
+                                :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+                            >
                                 Welcome to OPSVISION
                             </h2>
-                            <p class="text-gray-600 text-lg mb-8">
+                            <p
+                                class="text-lg mb-8"
+                                :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-600'"
+                            >
                                 Ask anything about your warehouse operations and get instant insights
                             </p>
                         </div>
@@ -67,7 +75,10 @@
                                 v-for="suggestion in suggestions"
                                 :key="suggestion.id"
                                 @click="handleSuggestionClick(suggestion.text)"
-                                class="p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-md transition-all duration-300 text-left group transform hover:-translate-y-1"
+                                class="p-4 border rounded-xl hover:shadow-md transition-all duration-300 text-left group transform hover:-translate-y-1"
+                                :class="themeStore.isDark
+                                    ? 'bg-slate-800 border-slate-700 hover:border-slate-600 hover:bg-slate-700'
+                                    : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
                             >
                                 <div class="flex items-start space-x-3">
                                     <div
@@ -90,10 +101,16 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="font-medium text-gray-900 group-hover:text-gray-700 mb-1">
+                                        <h3
+                                            class="font-medium mb-1"
+                                            :class="themeStore.isDark ? 'text-white group-hover:text-slate-200' : 'text-gray-900 group-hover:text-gray-700'"
+                                        >
                                             {{ suggestion.title }}
                                         </h3>
-                                        <p class="text-sm text-gray-600 group-hover:text-gray-500">
+                                        <p
+                                            class="text-sm"
+                                            :class="themeStore.isDark ? 'text-slate-300 group-hover:text-slate-400' : 'text-gray-600 group-hover:text-gray-500'"
+                                        >
                                             {{ suggestion.text }}
                                         </p>
                                     </div>
@@ -113,14 +130,20 @@
                                     v-model="store.inputMessage"
                                     type="text"
                                     placeholder="Ask anything about your warehouse operations..."
-                                    class="w-full px-5 py-4 pr-14 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-lg text-lg transition-all duration-300 focus:shadow-xl focus:scale-[1.02]"
+                                    class="w-full px-5 py-4 pr-14 border rounded-2xl focus:outline-none focus:ring-2 focus:border-transparent shadow-lg text-lg transition-all duration-300 focus:shadow-xl focus:scale-[1.02]"
+                                    :class="themeStore.isDark
+                                        ? 'text-white bg-slate-800 border-slate-600 focus:ring-slate-500 placeholder-slate-400'
+                                        : 'text-gray-900 bg-white border-gray-300 focus:ring-gray-500'"
                                     @keyup.enter="handleSendMessage"
                                     :disabled="store.loading"
                                 />
                                 <button
                                     @click="handleSendMessage"
                                     :disabled="!store.inputMessage.trim() || store.loading"
-                                    class="absolute right-3 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                    class="absolute right-3 p-2 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                    :class="themeStore.isDark
+                                        ? 'bg-slate-700 hover:bg-slate-600 disabled:bg-slate-500 focus:ring-slate-500'
+                                        : 'bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 focus:ring-gray-500'"
                                 >
                                     <svg
                                         v-if="!store.loading"
@@ -194,11 +217,15 @@
                 <!-- Scroll to Current Query Button -->
                 <button
                     @click="scrollToCurrentQuery"
-                    class="w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    class="w-10 h-10 border rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    :class="themeStore.isDark
+                        ? 'bg-slate-800 hover:bg-slate-700 border-slate-600 focus:ring-slate-400'
+                        : 'bg-white hover:bg-gray-50 border-gray-200 focus:ring-gray-400'"
                     title="Scroll to current query"
                 >
                     <svg
-                        class="w-4 h-4 text-gray-600"
+                        class="w-4 h-4"
+                        :class="themeStore.isDark ? 'text-slate-300' : 'text-gray-600'"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -221,7 +248,10 @@
         >
             <div
                 v-if="store.messages.length > 0"
-                class="fixed bottom-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-4 z-50 transition-all duration-300"
+                class="fixed bottom-0 right-0 border-t backdrop-blur-sm px-6 py-4 z-50 transition-all duration-300"
+                :class="themeStore.isDark
+                    ? 'border-slate-700 bg-slate-900/95'
+                    : 'border-gray-200 bg-white/95'"
                 :style="{ left: sidebarCollapsed ? '4rem' : '16rem' }"
             >
                 <div class="max-w-4xl mx-auto">
@@ -231,14 +261,20 @@
                                 v-model="store.inputMessage"
                                 type="text"
                                 placeholder="Ask anything about your warehouse operations..."
-                                class="w-full h-12 px-4 pr-12 text-gray-900 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent shadow-sm transition-all duration-200 focus:shadow-md"
+                                class="w-full h-12 px-4 pr-12 border rounded-2xl focus:outline-none focus:ring-2 focus:border-transparent shadow-sm transition-all duration-200 focus:shadow-md"
+                                :class="themeStore.isDark
+                                    ? 'text-white bg-slate-800 border-slate-600 focus:ring-slate-500 placeholder-slate-400'
+                                    : 'text-gray-900 bg-white border-gray-300 focus:ring-gray-500'"
                                 @keyup.enter="handleSendMessage"
                                 :disabled="store.loading"
                             />
                             <button
                                 @click="handleSendMessage"
                                 :disabled="!store.inputMessage.trim() || store.loading"
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 disabled:cursor-not-allowed text-white rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                :class="themeStore.isDark
+                                    ? 'bg-slate-700 hover:bg-slate-600 disabled:bg-slate-500 focus:ring-slate-500'
+                                    : 'bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 focus:ring-gray-500'"
                             >
                                 <svg
                                     v-if="!store.loading"
@@ -266,7 +302,10 @@
                         <!-- Start Over Button (Icon Only) -->
                         <button
                             @click="handleNewSearch"
-                            class="flex items-center justify-center w-12 h-12 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 cursor-pointer border border-gray-300"
+                            class="flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer border"
+                            :class="themeStore.isDark
+                                ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700 border-slate-600 focus:ring-slate-400'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-gray-300 focus:ring-gray-400'"
                             title="Clear chat and start over"
                         >
                             <svg
@@ -294,6 +333,7 @@
 import { ref, nextTick, inject, watch, onMounted, onUnmounted } from 'vue'
 import ChatBubble from './ChatBubble.vue'
 import { useSearchStore } from '../stores/searchStore.js'
+import { useThemeStore } from '../stores/theme.js'
 
 // Get sidebar collapsed state from parent
 const sidebarCollapsed = inject('sidebarCollapsed', ref(false))
@@ -307,6 +347,7 @@ const isScrolling = ref(false)
 
 // Store
 const store = useSearchStore()
+const themeStore = useThemeStore()
 
 // Sample suggestions
 const suggestions = ref([

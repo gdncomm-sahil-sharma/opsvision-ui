@@ -1,8 +1,14 @@
 <template>
-    <div class="w-full max-w-full bg-white overflow-hidden">
+    <div
+        class="w-full max-w-full overflow-hidden"
+        :class="themeStore.isDark ? 'bg-slate-800' : 'bg-white'"
+    >
         <!-- Title and Search -->
         <div class="pb-4 flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-900">
+            <h3
+                class="text-lg font-semibold"
+                :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+            >
                 {{ title }}
             </h3>
 
@@ -15,7 +21,12 @@
                 <select
                     v-if="enableColumnSearch"
                     v-model="searchColumn"
-                    class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 bg-gray-50 transition-all duration-200"
+                    :class="[
+                        'px-3 py-2 text-sm border rounded-md focus:outline-none transition-all duration-200',
+                        themeStore.isDark
+                            ? 'border-gray-600 bg-slate-700 text-white focus:border-gray-500'
+                            : 'border-gray-300 bg-gray-50 text-gray-900 focus:border-gray-400'
+                    ]"
                 >
                     <option value="">
                         All Columns
@@ -33,7 +44,8 @@
                 <div class="relative">
                     <!-- Search icon -->
                     <svg
-                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                        :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-400'"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -49,14 +61,24 @@
                         v-model="searchQuery"
                         type="text"
                         placeholder="Search here"
-                        class="pl-10 pr-10 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 w-64 bg-gray-50 transition-all duration-200"
+                        :class="[
+                            'pl-10 pr-10 py-2 text-sm border rounded-md focus:outline-none w-64 transition-all duration-200',
+                            themeStore.isDark
+                                ? 'border-gray-600 bg-slate-700 text-white placeholder-gray-400 focus:border-gray-500'
+                                : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500 focus:border-gray-400'
+                        ]"
                     />
 
                     <!-- Clear button -->
                     <button
                         v-if="searchQuery"
                         @click="clearSearch"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        :class="[
+                            'absolute right-3 top-1/2 transform -translate-y-1/2',
+                            themeStore.isDark
+                                ? 'text-gray-400 hover:text-gray-200'
+                                : 'text-gray-400 hover:text-gray-600'
+                        ]"
                     >
                         <svg
                             class="w-4 h-4"
@@ -78,18 +100,24 @@
 
         <!-- Table -->
         <div class="relative max-w-full">
-            <div class="overflow-x-auto overflow-y-hidden border border-gray-200 rounded-lg w-full">
+            <div
+                class="overflow-x-auto overflow-y-hidden border rounded-lg w-full"
+                :class="themeStore.isDark ? 'border-gray-600' : 'border-gray-200'"
+            >
                 <table
                     class="table-auto w-full"
                     style="min-width: max-content;"
                 >
                     <!-- Headers -->
-                    <thead class="bg-gray-50/70">
+                    <thead :class="themeStore.isDark ? 'bg-slate-700/70' : 'bg-gray-50/70'">
                         <tr>
                             <th
                                 v-for="(header, index) in headers"
                                 :key="index"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap"
+                                :class="[
+                                    'px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap',
+                                    themeStore.isDark ? 'text-gray-300' : 'text-gray-600'
+                                ]"
                             >
                                 {{ header }}
                             </th>
@@ -97,16 +125,26 @@
                     </thead>
 
                     <!-- Body -->
-                    <tbody class="bg-white divide-y divide-gray-100 border-t border-gray-100">
+                    <tbody
+                        :class="[
+                            'divide-y border-t',
+                            themeStore.isDark
+                                ? 'bg-slate-800 divide-gray-600 border-gray-600'
+                                : 'bg-white divide-gray-100 border-gray-100'
+                        ]"
+                    >
                         <tr
                             v-for="(row, rowIndex) in paginatedData"
                             :key="rowIndex"
-                            class="hover:bg-gray-50/50"
+                            :class="themeStore.isDark ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50/50'"
                         >
                             <td
                                 v-for="(cell, cellIndex) in row"
                                 :key="cellIndex"
-                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                :class="[
+                                    'px-6 py-4 whitespace-nowrap text-sm',
+                                    themeStore.isDark ? 'text-gray-200' : 'text-gray-900'
+                                ]"
                             >
                                 {{ formatCell(cell) }}
                             </td>
@@ -122,11 +160,14 @@
             class="px-6 py-4 flex items-center justify-between"
         >
             <!-- Results count -->
-            <div class="text-sm text-gray-700">
+            <div
+                class="text-sm"
+                :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-700'"
+            >
                 Showing {{ startRecord }} to {{ endRecord }} of {{ totalRecords }} events
                 <span
                     v-if="searchQuery"
-                    class="text-gray-500"
+                    :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-500'"
                 >
                     (filtered from {{ props.data.length }} total)
                 </span>
@@ -138,7 +179,12 @@
                 <button
                     @click="previousPage"
                     :disabled="currentPage === 1"
-                    class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :class="[
+                        'px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed',
+                        themeStore.isDark
+                            ? 'border-gray-600 text-white hover:bg-slate-700'
+                            : 'border-gray-300 text-gray-900 hover:bg-gray-50'
+                    ]"
                 >
                     ‹
                 </button>
@@ -151,8 +197,12 @@
                     :class="[
                         'px-3 py-1 text-sm border rounded',
                         page === currentPage
-                            ? 'bg-gray-700 text-white border-gray-700'
-                            : 'border-gray-300 hover:bg-gray-50'
+                            ? (themeStore.isDark
+                                ? 'bg-slate-600 text-white border-slate-600'
+                                : 'bg-gray-700 text-white border-gray-700')
+                            : (themeStore.isDark
+                                ? 'border-gray-600 text-gray-200 hover:bg-slate-700'
+                                : 'border-gray-300 text-gray-900 hover:bg-gray-50')
                     ]"
                 >
                     {{ page }}
@@ -162,7 +212,12 @@
                 <button
                     @click="nextPage"
                     :disabled="currentPage === totalPages"
-                    class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :class="[
+                        'px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed',
+                        themeStore.isDark
+                            ? 'border-gray-600 text-white hover:bg-slate-700'
+                            : 'border-gray-300 text-gray-900 hover:bg-gray-50'
+                    ]"
                 >
                     ›
                 </button>
@@ -174,6 +229,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import moment from 'moment'
+import { useThemeStore } from '../stores/theme.js'
 
 const props = defineProps({
     title: {
@@ -198,6 +254,8 @@ const props = defineProps({
         default: false
     }
 })
+
+const themeStore = useThemeStore()
 
 // Pagination state
 const currentPage = ref(1)
@@ -310,7 +368,7 @@ watch(searchQuery, () => {
 </script>
 
 <style scoped>
-/* Custom scrollbar styles */
+/* Custom scrollbar styles - Light mode */
 .overflow-x-auto {
     scrollbar-width: thin;
     scrollbar-color: #d1d5db #f3f4f6;
@@ -331,6 +389,23 @@ watch(searchQuery, () => {
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Custom scrollbar styles - Dark mode */
+:deep(.dark) .overflow-x-auto {
+    scrollbar-color: #6b7280 #374151;
+}
+
+:deep(.dark) .overflow-x-auto::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+:deep(.dark) .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
+:deep(.dark) .overflow-x-auto::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
 </style>

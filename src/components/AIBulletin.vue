@@ -2,7 +2,12 @@
     <div class="w-full">
         <!-- Header with AI icon -->
         <div class="flex items-center gap-3 pb-3 mb-4 border-b border-gray-200/40 dark:border-gray-700/40">
-            <span class="text-sm font-semibold text-slate-900 flex-1">AI Response</span>
+            <span
+                class="text-sm font-semibold flex-1"
+                :class="themeStore.isDark ? 'text-white' : 'text-slate-900'"
+            >
+                AI Response
+            </span>
             <button
                 v-if="showCopyButton"
                 class="p-1 rounded text-gray-500 cursor-pointer dark:text-gray-400 transition-colors duration-300"
@@ -59,13 +64,15 @@
             <div class="mb-6">
                 <p
                     v-if="!animateText"
-                    class="text-[15px] leading-relaxed text-slate-900 m-0 font-medium"
+                    class="text-[15px] leading-relaxed m-0 font-medium"
+                    :class="themeStore.isDark ? 'text-gray-200' : 'text-slate-900'"
                 >
                     {{ data.summary }}
                 </p>
                 <p
                     v-else
-                    class="text-[15px] leading-relaxed text-slate-900 m-0 font-medium"
+                    class="text-[15px] leading-relaxed m-0 font-medium"
+                    :class="themeStore.isDark ? 'text-gray-200' : 'text-slate-900'"
                 >
                     {{ displayedText }}
                 </p>
@@ -80,13 +87,18 @@
                     v-for="(point, index) in data.bullets"
                     :key="index"
                     class="flex items-start gap-3 opacity-0 translate-y-2 transition-all duration-400 ease-out"
-                    :class="{ '!opacity-100 !translate-y-0': !animateBullets || (animateBullets && index <= visiblebullets) }"
+                    :class="{ 'opacity-100! translate-y-0!': !animateBullets || (animateBullets && index <= visiblebullets) }"
                     :style="{ transitionDelay: `${index * 0.3}s` }"
                 >
-                    <div class="relative w-1.5 h-1.5 mt-2.5 flex-shrink-0">
+                    <div class="relative w-1.5 h-1.5 mt-2.5 shrink-0">
                         <div class="w-full h-full bg-gray-400/70 rounded-full dark:bg-gray-500/60" />
                     </div>
-                    <span class="text-sm leading-relaxed text-slate-800 font-medium">{{ point }}</span>
+                    <span
+                        class="text-sm leading-relaxed font-medium"
+                        :class="themeStore.isDark ? 'text-gray-300' : 'text-slate-800'"
+                    >
+                        {{ point }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -103,6 +115,7 @@
 
 <script setup>
 import { ref, onMounted, defineEmits } from 'vue'
+import { useThemeStore } from '../stores/theme.js'
 
 const props = defineProps({
     data: {
@@ -133,6 +146,7 @@ const props = defineProps({
 
 const emit = defineEmits(['copy'])
 
+const themeStore = useThemeStore()
 const displayedText = ref('')
 const visiblebullets = ref(-1)
 const formattedTime = ref('')
@@ -199,7 +213,7 @@ const copyToClipboard = async () => {
         emit('copy', textToCopy)
 
         // Reset to copy icon after 2 seconds
-        setTimeout(() => {
+        window.setTimeout(() => {
             justCopied.value = false
         }, 2000)
     } catch (error) {
