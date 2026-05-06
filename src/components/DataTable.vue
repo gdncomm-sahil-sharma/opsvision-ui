@@ -8,7 +8,7 @@
 
             <!-- Search Controls -->
             <div
-                v-if="totalPages > 1"
+                v-if="props.data.length > 0"
                 class="flex items-center space-x-3"
             >
                 <!-- Column Selector (optional) -->
