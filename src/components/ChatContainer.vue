@@ -172,7 +172,10 @@
                                 if (message.type === 'user' && isCurrentQueryPair(message, index)) currentQueryRef = el
                             }"
                         >
-                            <ChatBubble :message="message" />
+                            <ChatBubble
+                                :message="message"
+                                @retry-query="handleRetryQuery"
+                            />
                         </div>
                     </TransitionGroup>
                 </div>
@@ -372,22 +375,17 @@ const handleSendMessage = async () => {
 
     try {
         // Call the actual API through the store
-        console.log('🚀 Making API call for query:', query)
         await store.search(query)
-
-        console.log('✅ API call completed. Results:', store.results)
 
         // Remove loading message
         store.removeLoadingMessages()
 
-        // Add assistant response based on API results - create independent copy
+        // Add successful assistant response - create independent copy
         const assistantMessage = {
             id: Date.now() + 2,
             type: 'assistant',
             query: query, // Store the original query
-            content: store.error
-                ? `Sorry, I encountered an error: ${store.error}`
-                : store.results?.response || `I've processed your query about "${query}" and retrieved the relevant data.`,
+            content: store.results?.response || `I've processed your query about "${query}" and retrieved the relevant data.`,
             results: store.results ? JSON.parse(JSON.stringify(store.results)) : null, // Deep copy
             timestamp: new Date().toISOString()
         }
@@ -407,12 +405,11 @@ const handleSendMessage = async () => {
         // Remove loading message
         store.removeLoadingMessages()
 
-        // Add error message
         const errorMessage = {
             id: Date.now() + 2,
             type: 'assistant',
-            query: query, // Store the original query
-            content: `Sorry, I encountered an error while processing your request: ${error.message}`,
+            query: query,
+            content: 'I\'m sorry, I\'m currently unable to process your request. The service appears to be temporarily unavailable. Please try again later.',
             error: error.message,
             results: null,
             timestamp: new Date().toISOString()
@@ -425,6 +422,12 @@ const handleSendMessage = async () => {
 
 const handleSuggestionClick = (suggestionText) => {
     store.setInputMessage(suggestionText)
+    handleSendMessage()
+}
+
+const handleRetryQuery = (query) => {
+    // Set the query in the input and trigger send
+    store.setInputMessage(query)
     handleSendMessage()
 }
 

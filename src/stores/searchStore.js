@@ -51,6 +51,8 @@ export const useSearchStore = defineStore('search', {
             } catch (error) {
                 this.error = error.message || 'Search failed'
                 this.results = null
+                // Re-throw the error so it can be caught by the calling component
+                throw error
             } finally {
                 this.loading = false
             }

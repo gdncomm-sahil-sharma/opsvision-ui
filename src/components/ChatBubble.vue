@@ -66,9 +66,59 @@
                     v-else
                     class="bg-white border border-gray-200 rounded-2xl rounded-tl-md w-full max-w-full overflow-hidden"
                 >
+                    <!-- Error Message Section -->
+                    <div
+                        v-if="message.error"
+                        class="px-6 py-5"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-3 flex-1">
+                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+                                    <svg
+                                        class="w-5 h-5 text-red-600"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-gray-900 text-base leading-relaxed">
+                                        {{ message.content }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                @click="retryQuery(message.query)"
+                                class="ml-3 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                                title="Retry request"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Text Response Section -->
                     <div
-                        v-if="getResponseType(message.results).includes('text')"
+                        v-else-if="getResponseType(message.results).includes('text')"
                         class="px-6 py-5"
                     >
                         <AIBulletin
@@ -126,7 +176,7 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 import { getResponseType } from '../utils/responseHelper.js'
 import StatusBasedTimeline from './StatusBasedTimeline.vue'
 import AIBulletin from './AIBulletin.vue'
@@ -139,10 +189,16 @@ defineProps({
     }
 })
 
+const emit = defineEmits(['retry-query'])
+
 const formatTime = (timestamp) => {
     if (!timestamp) return ''
     const date = new Date(timestamp)
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+const retryQuery = (query) => {
+    emit('retry-query', query)
 }
 </script>
 
