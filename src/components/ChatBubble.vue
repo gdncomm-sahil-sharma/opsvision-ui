@@ -72,21 +72,21 @@
                         class="px-6 py-5"
                     >
                         <AIBulletin
-                            :key="message.results.data.textResponse.summary"
-                            :data="message.results.data.textResponse"
+                            :key="message.results?.data?.textResponse?.summary"
+                            :data="message.results?.data?.textResponse"
                             :animate-text="false"
                             :animate-bullets="false"
                             :show-copy-button="true"
                             :show-timestamp="false"
                         />
                     </div>
-                    
+
                     <!-- Subtle separator line -->
                     <div
                         v-if="getResponseType(message.results).includes('text') && getResponseType(message.results).includes('timelines')"
                         class="border-t border-gray-100"
-                    ></div>
-                    
+                    />
+
                     <!-- Timeline Section -->
                     <div
                         v-if="getResponseType(message.results).includes('timelines')"
