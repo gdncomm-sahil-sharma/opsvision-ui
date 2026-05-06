@@ -432,12 +432,6 @@ const handleSendMessage = async () => {
         }
 
         store.addMessage(assistantMessage)
-        console.log('✅ Message added with independent results:', {
-            messageId: assistantMessage.id,
-            query: assistantMessage.query,
-            hasResults: !!assistantMessage.results,
-            resultsTimestamp: assistantMessage.results?.timestamp
-        })
 
         // Scroll to show the complete query-response pair
         await scrollToCurrentQuery()

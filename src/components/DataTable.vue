@@ -293,7 +293,6 @@ const paginatedData = computed(() => {
     const itemsPerPageNum = Number(props.itemsPerPage)
     const start = (currentPage.value - 1) * itemsPerPageNum
     const end = start + itemsPerPageNum
-    console.log('DataTable pagination:', { itemsPerPage: props.itemsPerPage, itemsPerPageNum, start, end, totalData: filteredData.value.length })
     return filteredData.value.slice(start, end)
 })
 
