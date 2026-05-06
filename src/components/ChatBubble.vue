@@ -54,44 +54,71 @@
                     </div>
                 </div>
 
-                <!-- Loading State -->
+                <!-- Assistant Response Content (Always show for streaming components) -->
                 <div
-                    v-if="message.loading"
-                    class="border rounded-2xl rounded-tl-md px-6 py-4 animate-pulse-subtle"
-                    :class="themeStore.isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'"
-                >
-                    <div class="flex items-center space-x-3">
-                        <div class="flex space-x-1">
-                            <div
-                                class="w-2 h-2 rounded-full animate-pulse"
-                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
-                            />
-                            <div
-                                class="w-2 h-2 rounded-full animate-pulse"
-                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
-                                style="animation-delay: 0.2s"
-                            />
-                            <div
-                                class="w-2 h-2 rounded-full animate-pulse"
-                                :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
-                                style="animation-delay: 0.4s"
-                            />
-                        </div>
-                        <span
-                            class="text-sm"
-                            :class="themeStore.isDark ? 'text-slate-300' : 'text-gray-500'"
-                        >
-                            Analyzing your query...
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Assistant Response Content -->
-                <div
-                    v-else
                     class="border rounded-2xl rounded-tl-md w-full max-w-full overflow-hidden"
                     :class="themeStore.isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'"
                 >
+                    <!-- Loading State (only at the top when still loading) -->
+                    <div
+                        v-if="message.loading"
+                        class="px-6 py-4"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <div class="flex space-x-1">
+                                <div
+                                    class="w-2 h-2 rounded-full animate-pulse"
+                                    :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
+                                />
+                                <div
+                                    class="w-2 h-2 rounded-full animate-pulse"
+                                    :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
+                                    style="animation-delay: 0.2s"
+                                />
+                                <div
+                                    class="w-2 h-2 rounded-full animate-pulse"
+                                    :class="themeStore.isDark ? 'bg-slate-400' : 'bg-gray-400'"
+                                    style="animation-delay: 0.4s"
+                                />
+                            </div>
+                            <span
+                                class="text-sm"
+                                :class="themeStore.isDark ? 'text-slate-300' : 'text-gray-500'"
+                            >
+                                {{ getLoadingText(message) }}
+                            </span>
+                        </div>
+
+                        <!-- Tool Call Status -->
+                        <div
+                            v-if="message.toolCalls && message.toolCalls.length > 0"
+                            class="mt-3 space-y-2"
+                        >
+                            <div
+                                v-for="tool in message.toolCalls"
+                                :key="tool.toolName"
+                                class="flex items-center space-x-2 text-xs"
+                            >
+                                <div
+                                    class="w-1.5 h-1.5 rounded-full"
+                                    :class="getToolStatusClass(tool.status)"
+                                />
+                                <span :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-500'">
+                                    {{ tool.toolName }}
+                                    <span v-if="tool.status === 'SUCCESS'">✓</span>
+                                    <span v-else-if="tool.status === 'FAILED'">✗</span>
+                                    <span v-else-if="tool.status === 'CACHE_HIT'">⚡</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Separator after loading state if there are streaming components -->
+                    <div
+                        v-if="message.loading && hasAnyStreamingComponents(message)"
+                        class="border-t"
+                        :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
+                    />
                     <!-- Error Message Section -->
                     <div
                         v-if="message.error"
@@ -151,57 +178,73 @@
                         </div>
                     </div>
 
-                    <!-- Text Response Section -->
-                    <div
-                        v-else-if="getResponseType(message.results).includes('text')"
-                        class="px-6 py-5"
+                    <!-- Streaming Text Response Section -->
+                    <Transition
+                        name="slide-fade"
+                        appear
                     >
-                        <AIBulletin
-                            :key="message.results?.data?.textResponse?.summary"
-                            :data="message.results?.data?.textResponse"
-                            :animate-text="false"
-                            :animate-bullets="false"
-                            :show-copy-button="true"
-                            :show-timestamp="false"
-                        />
-                    </div>
+                        <div
+                            v-if="hasStreamingTextResponse(message)"
+                            class="px-6 py-5"
+                        >
+                            <AIBulletin
+                                :key="getTextResponseKey(message)"
+                                :data="getTextResponseData(message)"
+                                :animate-text="false"
+                                :animate-bullets="false"
+                                :show-copy-button="true"
+                                :show-timestamp="false"
+                            />
+                        </div>
+                    </Transition>
 
                     <!-- Subtle separator line -->
                     <div
-                        v-if="getResponseType(message.results).includes('text') && getResponseType(message.results).includes('timelines')"
+                        v-if="hasStreamingTextResponse(message) && hasStreamingTimeline(message)"
                         class="border-t"
                         :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
 
-                    <!-- Timeline Section -->
-                    <div
-                        v-if="getResponseType(message.results).includes('timelines')"
-                        class="px-6 py-5"
+                    <!-- Streaming Timeline Section -->
+                    <Transition
+                        name="slide-fade"
+                        appear
                     >
-                        <StatusBasedTimeline
-                            :title="message.results.data.timelines.title"
-                            :timelineData="message.results.data.timelines.data"
-                        />
-                    </div>
+                        <div
+                            v-if="hasStreamingTimeline(message)"
+                            class="px-6 py-5"
+                        >
+                            <StatusBasedTimeline
+                                :title="getTimelineData(message).title"
+                                :timelineData="getTimelineData(message).data"
+                            />
+                        </div>
+                    </Transition>
 
                     <!-- Separator line between timeline and table -->
                     <div
-                        v-if="getResponseType(message.results).includes('timelines') && getResponseType(message.results).includes('table')"
+                        v-if="hasStreamingTimeline(message) && hasStreamingTable(message)"
                         class="border-t"
                         :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
 
-                    <div
-                        v-if="getResponseType(message.results).includes('table')"
-                        class="px-6 py-5 w-full max-w-full overflow-hidden"
+                    <!-- Streaming Table Section -->
+                    <Transition
+                        name="slide-fade"
+                        appear
                     >
-                        <DataTable
-                            :title="message.results.data.table.title"
-                            :headers="message.results.data.table.headers"
-                            :data="message.results.data.table.data"
-                            :itemsPerPage="5"
-                        />
-                    </div>
+                        <div
+                            v-if="hasStreamingTable(message)"
+                            class="px-6 py-5 w-full max-w-full overflow-hidden"
+                        >
+                            <DataTable
+                                :title="getTableData(message).title"
+                                :headers="getTableData(message).headers"
+                                :data="getTableData(message).data"
+                                :itemsPerPage="5"
+                            />
+                        </div>
+                    </Transition>
                 </div>
 
                 <div class="mt-1">
@@ -244,6 +287,72 @@ const formatTime = (timestamp) => {
 const retryQuery = (query) => {
     emit('retry-query', query)
 }
+
+// Streaming helper functions
+const getLoadingText = (message) => {
+    if (message.streaming) {
+        if (message.toolCalls?.some(tool => tool.status === 'running')) {
+            return 'Processing tools...'
+        }
+        return 'Analyzing your query...'
+    }
+    return 'Analyzing your query...'
+}
+
+const getToolStatusClass = (status) => {
+    switch (status) {
+    case 'SUCCESS':
+        return 'bg-green-500'
+    case 'FAILED':
+        return 'bg-red-500'
+    case 'CACHE_HIT':
+        return 'bg-blue-500'
+    case 'running':
+    default:
+        return 'bg-yellow-500 animate-pulse'
+    }
+}
+
+// Streaming component detection helpers
+const hasStreamingTextResponse = (message) => {
+    return message.streamingComponents?.textResponse ||
+        (message.results?.data?.textResponse && getResponseType(message.results).includes('text'))
+}
+
+const hasStreamingTimeline = (message) => {
+    const timelineData = message.streamingComponents?.timeline || message.results?.data?.timelines
+    return timelineData && timelineData.data && timelineData.data.length > 0
+}
+
+const hasStreamingTable = (message) => {
+    const tableData = message.streamingComponents?.table || message.results?.data?.table
+    return tableData && tableData.data && tableData.data.length > 0
+}
+
+const hasAnyStreamingComponents = (message) => {
+    return hasStreamingTextResponse(message) ||
+        hasStreamingTimeline(message) ||
+        hasStreamingTable(message)
+}
+
+// Streaming data getters
+const getTextResponseData = (message) => {
+    return message.streamingComponents?.textResponse || message.results?.data?.textResponse
+}
+
+const getTextResponseKey = (message) => {
+    const data = getTextResponseData(message)
+    return data?.summary || message.id
+}
+
+const getTimelineData = (message) => {
+    return message.streamingComponents?.timeline || message.results?.data?.timelines || { title: '', data: [] }
+}
+
+const getTableData = (message) => {
+    return message.streamingComponents?.table || message.results?.data?.table || { title: '', headers: [], data: [] }
+}
+
 </script>
 
 <style scoped>
@@ -260,5 +369,30 @@ const retryQuery = (query) => {
 
 .animate-pulse-subtle {
     animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Slide-fade animation for streaming components */
+.slide-fade-enter-active {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slide-fade-leave-active {
+    transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+.slide-fade-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+}
+
+.slide-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+}
+
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 </style>

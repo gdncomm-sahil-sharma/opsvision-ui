@@ -389,68 +389,19 @@ const suggestions = ref([
 const handleSendMessage = async () => {
     if (!store.inputMessage.trim() || store.loading) return
 
-    const userMessage = {
-        id: Date.now(),
-        type: 'user',
-        content: store.inputMessage.trim(),
-        timestamp: new Date().toISOString()
-    }
-
-    // Add user message
-    store.addMessage(userMessage)
-
-    // Create loading assistant message
-    const loadingMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        loading: true,
-        timestamp: new Date().toISOString()
-    }
-
-    store.addMessage(loadingMessage)
-
-    // Clear input and scroll to current query
+    // Clear input and store query
     const query = store.inputMessage.trim()
     store.clearInputMessage()
-    await scrollToCurrentQuery()
 
     try {
-        // Call the actual API through the store
-        await store.search(query)
-
-        // Remove loading message
-        store.removeLoadingMessages()
-
-        // Add successful assistant response - create independent copy
-        const assistantMessage = {
-            id: Date.now() + 2,
-            type: 'assistant',
-            query: query, // Store the original query
-            content: store.results?.response || `I've processed your query about "${query}" and retrieved the relevant data.`,
-            results: store.results ? JSON.parse(JSON.stringify(store.results)) : null, // Deep copy
-            timestamp: new Date().toISOString()
-        }
-
-        store.addMessage(assistantMessage)
+        // Call the streaming search function
+        await store.streamSearch(query)
 
         // Scroll to show the complete query-response pair
         await scrollToCurrentQuery()
-
     } catch (error) {
-        // Remove loading message
-        store.removeLoadingMessages()
-
-        const errorMessage = {
-            id: Date.now() + 2,
-            type: 'assistant',
-            query: query,
-            content: 'I\'m sorry, I\'m currently unable to process your request. The service appears to be temporarily unavailable. Please try again later.',
-            error: error.message,
-            results: null,
-            timestamp: new Date().toISOString()
-        }
-
-        store.addMessage(errorMessage)
+        console.error('Chat error:', error)
+        // Error handling is done in the store
         await scrollToCurrentQuery()
     }
 }
