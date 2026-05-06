@@ -35,18 +35,12 @@
                         appear
                     >
                         <div class="mb-12 mt-16">
-                            <div class="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <svg
-                                    class="w-8 h-8 text-white"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
+                            <div class="w-16 h-16 bg-slate-700 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <img
+                                    :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"
+                                    alt="OpsVision Warehouse Icon"
+                                    class="w-10 h-10"
+                                />
                             </div>
                             <h2
                                 class="text-2xl font-semibold mb-2"

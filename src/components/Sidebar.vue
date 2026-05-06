@@ -17,17 +17,11 @@
         >
             <div class="flex items-center space-x-2">
                 <div class="w-7 h-7 bg-gray-800 rounded-lg flex items-center justify-center">
-                    <svg
-                        class="w-4 h-4 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
+                    <img
+                        :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"
+                        alt="OpsVision Icon"
+                        class="w-5 h-5"
+                    />
                 </div>
                 <span
                     :class="[
@@ -80,17 +74,11 @@
                     title="Open sidebar"
                 >
                     <!-- Logo (default state) -->
-                    <svg
-                        class="w-4 h-4 text-white transition-opacity duration-200 group-hover:opacity-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v1H3V4zm14 2v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6h14zM6 8h8v2H6V8zm0 4h5v2H6v-2z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
+                    <img
+                        :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"
+                        alt="OpsVision Icon"
+                        class="w-5 h-5 transition-opacity duration-200 group-hover:opacity-0"
+                    />
 
                     <!-- Expand icon (hover state) -->
                     <svg

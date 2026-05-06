@@ -14,7 +14,7 @@
 
             <!-- Search Controls -->
             <div
-                v-if="props.data.length > 0"
+                v-if="props.data.length > 1"
                 class="flex items-center space-x-3"
             >
                 <!-- Column Selector (optional) -->
