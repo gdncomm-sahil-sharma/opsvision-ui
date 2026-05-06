@@ -2,7 +2,8 @@
  * Simple API Helper
  */
 
-const API_BASE_URL = import.meta.env.VITE_BE_API_BASE_URL || 'http://localhost:3000/api'
+// Use proxy path for development, or full URL for production
+const API_BASE_URL = '/opsvision/api'
 /**
  * Generic GET fetch function
  * @param {string} endpoint - API endpoint
