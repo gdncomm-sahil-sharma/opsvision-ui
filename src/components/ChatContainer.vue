@@ -1,10 +1,23 @@
 <template>
     <div class="flex flex-col h-full relative">
+        <!-- Scroll Progress Indicator -->
+        <Transition name="fade">
+            <div
+                v-if="store.messages.length > 0 && isScrolling"
+                class="absolute top-0 left-0 right-0 h-1 bg-gray-200 z-10"
+            >
+                <div
+                    class="h-full bg-gray-800 transition-all duration-150 ease-out"
+                    :style="{ width: `${scrollProgress}%` }"
+                />
+            </div>
+        </Transition>
         <!-- Chat Messages Area -->
         <div
             class="flex-1 overflow-y-auto"
             :class="store.messages.length === 0 ? 'px-6 py-4' : 'px-6 py-4 pb-32'"
             ref="messagesContainer"
+            @scroll="handleScroll"
         >
             <!-- Welcome Message (when no messages) -->
             <Transition
@@ -151,15 +164,52 @@
                         class="space-y-1"
                         appear
                     >
-                        <ChatBubble
-                            v-for="message in store.messages"
+                        <div
+                            v-for="(message, index) in store.messages"
                             :key="message.id"
-                            :message="message"
-                        />
+                            :ref="el => {
+                                if (index === store.messages.length - 1) latestMessageRef = el
+                                if (message.type === 'user' && isCurrentQueryPair(message, index)) currentQueryRef = el
+                            }"
+                        >
+                            <ChatBubble :message="message" />
+                        </div>
                     </TransitionGroup>
                 </div>
             </Transition>
         </div>
+
+        <!-- Scroll Controls -->
+        <Transition
+            name="fade"
+            appear
+        >
+            <div
+                v-if="store.messages.length > 2"
+                class="fixed right-6 bottom-24 z-40"
+            >
+                <!-- Scroll to Current Query Button -->
+                <button
+                    @click="scrollToCurrentQuery"
+                    class="w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    title="Scroll to current query"
+                >
+                    <svg
+                        class="w-4 h-4 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </Transition>
 
         <!-- Fixed Chat Input Area (when messages exist) -->
         <Transition
@@ -238,7 +288,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, inject } from 'vue'
+import { ref, nextTick, inject, watch, onMounted, onUnmounted } from 'vue'
 import ChatBubble from './ChatBubble.vue'
 import { useSearchStore } from '../stores/searchStore.js'
 
@@ -247,6 +297,10 @@ const sidebarCollapsed = inject('sidebarCollapsed', ref(false))
 
 // Reactive data
 const messagesContainer = ref(null)
+const latestMessageRef = ref(null)
+const currentQueryRef = ref(null)
+const scrollProgress = ref(0)
+const isScrolling = ref(false)
 
 // Store
 const store = useSearchStore()
@@ -311,10 +365,10 @@ const handleSendMessage = async () => {
 
     store.addMessage(loadingMessage)
 
-    // Clear input and scroll to bottom
+    // Clear input and scroll to current query
     const query = store.inputMessage.trim()
     store.clearInputMessage()
-    await scrollToBottom()
+    await scrollToCurrentQuery()
 
     try {
         // Call the actual API through the store
@@ -345,7 +399,9 @@ const handleSendMessage = async () => {
             hasResults: !!assistantMessage.results,
             resultsTimestamp: assistantMessage.results?.timestamp
         })
-        await scrollToBottom()
+
+        // Scroll to show the complete query-response pair
+        await scrollToCurrentQuery()
 
     } catch (error) {
         // Remove loading message
@@ -363,7 +419,7 @@ const handleSendMessage = async () => {
         }
 
         store.addMessage(errorMessage)
-        await scrollToBottom()
+        await scrollToCurrentQuery()
     }
 }
 
@@ -376,12 +432,111 @@ const handleNewSearch = () => {
     store.clear()
 }
 
-const scrollToBottom = async () => {
-    await nextTick()
-    if (messagesContainer.value) {
-        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+// Helper function to check if a user message is part of the current query pair
+const isCurrentQueryPair = (message, index) => {
+    if (message.type !== 'user') return false
+    // Check if this is one of the last two messages (user query + assistant response)
+    return index >= store.messages.length - 2
+}
+
+// Scroll progress tracking
+const updateScrollProgress = () => {
+    if (!messagesContainer.value) return
+
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainer.value
+    const maxScroll = scrollHeight - clientHeight
+
+    if (maxScroll > 0) {
+        scrollProgress.value = (scrollTop / maxScroll) * 100
+    } else {
+        scrollProgress.value = 0
     }
 }
+
+const handleScroll = () => {
+    updateScrollProgress()
+
+    // Show scrolling indicator
+    isScrolling.value = true
+    // eslint-disable-next-line no-undef
+    clearTimeout(handleScroll.timeout)
+    // eslint-disable-next-line no-undef
+    handleScroll.timeout = setTimeout(() => {
+        isScrolling.value = false
+    }, 150)
+}
+
+// Enhanced scroll functions
+
+const scrollToLatestMessage = async () => {
+    await nextTick()
+    if (latestMessageRef.value && messagesContainer.value) {
+        const containerRect = messagesContainer.value.getBoundingClientRect()
+        const messageRect = latestMessageRef.value.getBoundingClientRect()
+
+        // Check if message is not fully visible
+        if (messageRect.bottom > containerRect.bottom || messageRect.top < containerRect.top) {
+            latestMessageRef.value.scrollIntoView({
+                behavior: 'smooth',
+                block: 'end',
+                inline: 'nearest'
+            })
+        }
+    }
+}
+
+const scrollToCurrentQuery = async () => {
+    await nextTick()
+    if (currentQueryRef.value && messagesContainer.value) {
+        currentQueryRef.value.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+        })
+    }
+}
+
+// Watch for new messages and auto-scroll
+watch(() => store.messages.length, async (newLength, oldLength) => {
+    if (newLength > oldLength) {
+        // Delay scroll slightly to ensure DOM is updated
+        // eslint-disable-next-line no-undef
+        setTimeout(() => {
+            scrollToCurrentQuery()
+        }, 100)
+    }
+}, { immediate: false })
+
+// Keyboard shortcuts for scroll navigation
+const handleKeydown = (event) => {
+    // Ctrl/Cmd + Home: Scroll to current query
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Home') {
+        event.preventDefault()
+        scrollToCurrentQuery()
+    }
+    // Ctrl/Cmd + End: Scroll to latest message (keep for accessibility)
+    if ((event.ctrlKey || event.metaKey) && event.key === 'End') {
+        event.preventDefault()
+        scrollToLatestMessage()
+    }
+}
+
+// Mount and unmount lifecycle
+onMounted(() => {
+    document.addEventListener('keydown', handleKeydown)
+    // Initial scroll progress calculation
+    if (messagesContainer.value) {
+        updateScrollProgress()
+    }
+})
+
+onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown)
+    if (handleScroll.timeout) {
+        // eslint-disable-next-line no-undef
+        clearTimeout(handleScroll.timeout)
+    }
+})
 
 </script>
 
@@ -501,5 +656,17 @@ const scrollToBottom = async () => {
 
 .animate-spin {
     animation: smooth-spin 1s linear infinite;
+}
+
+/* Fade transition for scroll controls */
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.3s ease-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
 }
 </style>
