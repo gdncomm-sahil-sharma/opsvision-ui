@@ -2,7 +2,7 @@
     <div class="w-full">
         <!-- User Message -->
         <div
-            v-if="message.type === 'user'"
+            v-if="props.message.type === 'user'"
             class="flex justify-end mb-4 first:mt-0"
         >
             <div class="max-w-4xl">
@@ -14,7 +14,7 @@
                         class="text-base leading-relaxed"
                         :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
                     >
-                        {{ message.content }}
+                        {{ props.message.content }}
                     </p>
                 </div>
                 <div class="text-right mt-1">
@@ -22,7 +22,7 @@
                         class="text-xs"
                         :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-400'"
                     >
-                        {{ formatTime(message.timestamp) }}
+                        {{ formatTime(props.message.timestamp) }}
                     </span>
                 </div>
             </div>
@@ -34,17 +34,26 @@
             class="flex justify-start mb-6 first:mt-0"
         >
             <div class="max-w-4xl overflow-hidden">
-                <!-- Assistant Avatar -->
-                <div class="flex items-start space-x-4 mb-2">
+                <!-- Assistant Avatar and Actions -->
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-start space-x-4">
+                        <div
+                            class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-800'"
+                        >
+                            <img
+                                :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"
+                                alt="OpsVision Icon"
+                                class="w-6 h-6"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Response Actions -->
                     <div
-                        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                        :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-800'"
+                        v-if="!props.message.loading && !props.message.error && hasAnyStreamingComponents(props.message)"
+                        class="flex items-center gap-2"
                     >
-                        <img
-                            :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"
-                            alt="OpsVision Icon"
-                            class="w-6 h-6"
-                        />
                     </div>
                 </div>
 
@@ -55,7 +64,7 @@
                 >
                     <!-- Loading State (only at the top when still loading) -->
                     <div
-                        v-if="message.loading"
+                        v-if="props.message.loading"
                         class="px-6 py-4"
                     >
                         <div class="flex items-center space-x-3">
@@ -79,17 +88,17 @@
                                 class="text-sm"
                                 :class="themeStore.isDark ? 'text-slate-300' : 'text-gray-500'"
                             >
-                                {{ getLoadingText(message) }}
+                                {{ getLoadingText(props.message) }}
                             </span>
                         </div>
 
                         <!-- Tool Call Status -->
                         <div
-                            v-if="message.toolCalls && message.toolCalls.length > 0"
+                            v-if="props.message.toolCalls && props.message.toolCalls.length > 0"
                             class="mt-3 space-y-2"
                         >
                             <div
-                                v-for="tool in message.toolCalls"
+                                v-for="tool in props.message.toolCalls"
                                 :key="tool.toolName"
                                 class="flex items-center space-x-2 text-xs"
                             >
@@ -109,13 +118,13 @@
 
                     <!-- Separator after loading state if there are streaming components -->
                     <div
-                        v-if="message.loading && hasAnyStreamingComponents(message)"
+                        v-if="props.message.loading && hasAnyStreamingComponents(props.message)"
                         class="border-t"
                         :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
                     <!-- Error Message Section -->
                     <div
-                        v-if="message.error"
+                        v-if="props.message.error"
                         class="px-6 py-5"
                     >
                         <div class="flex items-start justify-between">
@@ -143,12 +152,12 @@
                                         class="text-base leading-relaxed"
                                         :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
                                     >
-                                        {{ message.content }}
+                                        {{ props.message.content }}
                                     </p>
                                 </div>
                             </div>
                             <button
-                                @click="retryQuery(message.query)"
+                                @click="retryQuery(props.message.query)"
                                 class="ml-3 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
                                 :class="themeStore.isDark
                                     ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700 focus:ring-slate-400'
@@ -178,15 +187,16 @@
                         appear
                     >
                         <div
-                            v-if="hasStreamingTextResponse(message)"
+                            v-if="hasStreamingTextResponse(props.message)"
                             class="px-6 py-5"
                         >
                             <AIBulletin
-                                :key="getTextResponseKey(message)"
-                                :data="getTextResponseData(message)"
+                                :key="getTextResponseKey(props.message)"
+                                :data="getTextResponseData(props.message)"
+                                :query="props.message.query"
                                 :animate-text="false"
                                 :animate-bullets="false"
-                                :show-copy-button="true"
+                                :show-copy-button="false"
                                 :show-timestamp="false"
                             />
                         </div>
@@ -194,7 +204,7 @@
 
                     <!-- Subtle separator line -->
                     <div
-                        v-if="hasStreamingTextResponse(message) && hasStreamingTimeline(message)"
+                        v-if="hasStreamingTextResponse(props.message) && hasStreamingTimeline(props.message)"
                         class="border-t"
                         :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
@@ -205,19 +215,19 @@
                         appear
                     >
                         <div
-                            v-if="hasStreamingTimeline(message)"
+                            v-if="hasStreamingTimeline(props.message)"
                             class="px-6 py-5"
                         >
                             <StatusBasedTimeline
-                                :title="getTimelineData(message).title"
-                                :timelineData="getTimelineData(message).data"
+                                :title="getTimelineData(props.message).title"
+                                :timelineData="getTimelineData(props.message).data"
                             />
                         </div>
                     </Transition>
 
                     <!-- Separator line between timeline and table -->
                     <div
-                        v-if="hasStreamingTimeline(message) && hasStreamingTable(message)"
+                        v-if="hasStreamingTimeline(props.message) && hasStreamingTable(props.message)"
                         class="border-t"
                         :class="themeStore.isDark ? 'border-slate-600' : 'border-gray-100'"
                     />
@@ -228,32 +238,126 @@
                         appear
                     >
                         <div
-                            v-if="hasStreamingTable(message)"
+                            v-if="hasStreamingTable(props.message)"
                             class="px-6 py-5 w-full max-w-full overflow-hidden"
                         >
                             <DataTable
-                                :title="getTableData(message).title"
-                                :headers="getTableData(message).headers"
-                                :data="getTableData(message).data"
+                                :title="getTableData(props.message).title"
+                                :headers="getTableData(props.message).headers"
+                                :data="getTableData(props.message).data"
+                                :query="props.message.query"
                                 :itemsPerPage="5"
                             />
                         </div>
                     </Transition>
                 </div>
 
-                <!-- Feedback Section (only for completed assistant messages) -->
+                <!-- Actions Section (only for completed assistant messages) -->
                 <div
-                    v-if="!message.loading && !message.error && hasAnyStreamingComponents(message)"
-                    class="mt-3"
+                    v-if="!props.message.loading && !props.message.error && hasAnyStreamingComponents(props.message)"
+                    class="mt-3 flex items-center space-x-1"
                 >
+                    <!-- Copy Button -->
+                    <button
+                        @click="copyCompleteResponse"
+                        class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
+                        :class="themeStore.isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'"
+                    >
+                        <!-- Copy Icon (default state) -->
+                        <svg
+                            v-if="!isJustCopied"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            class="transition-all duration-200 group-hover:scale-110"
+                        >
+                            <rect
+                                width="14"
+                                height="14"
+                                x="8"
+                                y="8"
+                                rx="2"
+                                ry="2"
+                            />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                        
+                        <!-- Checkmark Icon (copied state) -->
+                        <svg
+                            v-else
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            class="transition-all duration-200 scale-110"
+                        >
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                    </button>
+
+                    <!-- Feedback Buttons -->
                     <FeedbackButtons
                         ref="feedbackButtonsRef"
-                        :message-id="message.id"
-                        :sequence="getMessageSequence(message)"
-                        :feedback="message.feedback"
+                        :message-id="props.message.id"
+                        :sequence="getMessageSequence(props.message)"
+                        :feedback="props.message.feedback"
                         @open-feedback-modal="handleOpenFeedbackModal"
                         @feedback-submitted="handleFeedbackSubmitted"
                     />
+
+                    <!-- Download Button with Dropdown -->
+                    <div
+                        v-if="hasStreamingTable(props.message) || hasMultipleStreamingComponentTypes(props.message)"
+                        class="download-dropdown relative"
+                    >
+                        <button
+                            class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
+                            :class="themeStore.isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'"
+                        >
+                            <!-- Download Icon -->
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                class="transition-all duration-200 group-hover:scale-110"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7,10 12,15 17,10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="download-menu" :class="{ 'dark-theme': themeStore.isDark }">
+                            <button
+                                v-if="hasStreamingTable(props.message)"
+                                @click="downloadCompleteResponseExcel"
+                                class="download-option"
+                                :class="{ 'dark-theme': themeStore.isDark }"
+                            >
+                                Export as Excel
+                            </button>
+                            <button
+                                v-if="hasMultipleStreamingComponentTypes(props.message)"
+                                @click="downloadCompleteResponsePDF"
+                                class="download-option"
+                                :class="{ 'dark-theme': themeStore.isDark }"
+                            >
+                                Export as PDF
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-1">
@@ -261,7 +365,7 @@
                         class="text-xs"
                         :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-400'"
                     >
-                        {{ formatTime(message.timestamp) }}
+                        {{ formatTime(props.message.timestamp) }}
                     </span>
                 </div>
             </div>
@@ -278,8 +382,10 @@ import DataTable from './DataTable.vue'
 import FeedbackButtons from './FeedbackButtons.vue'
 import { useThemeStore } from '../stores/theme.js'
 import { useSearchStore } from '../stores/searchStore.js'
+import { generateComprehensivePDF } from '../utils/pdfExport.js'
+import { generateComprehensiveExcel } from '../utils/excelExport.js'
 
-defineProps({
+const props = defineProps({
     message: {
         type: Object,
         required: true
@@ -296,6 +402,7 @@ const showToast = inject('showToast', null)
 
 // Refs
 const feedbackButtonsRef = ref(null)
+const isJustCopied = ref(false)
 
 const formatTime = (timestamp) => {
     if (!timestamp) return ''
@@ -354,6 +461,18 @@ const hasAnyStreamingComponents = (message) => {
         hasStreamingTable(message)
 }
 
+const countStreamingComponentTypes = (message) => {
+    let count = 0
+    if (hasStreamingTextResponse(message)) count++
+    if (hasStreamingTimeline(message)) count++
+    if (hasStreamingTable(message)) count++
+    return count
+}
+
+const hasMultipleStreamingComponentTypes = (message) => {
+    return countStreamingComponentTypes(message) >= 2
+}
+
 // Streaming data getters
 const getTextResponseData = (message) => {
     return message.streamingComponents?.textResponse || message.results?.data?.textResponse
@@ -365,7 +484,34 @@ const getTextResponseKey = (message) => {
 }
 
 const getTimelineData = (message) => {
-    return message.streamingComponents?.timeline || message.results?.data?.timelines || { title: '', data: [] }
+    const timelineData = message.streamingComponents?.timeline || message.results?.data?.timelines || { title: '', data: [] }
+    
+    // Convert YYYYMMDD dates to epoch timestamps for StatusBasedTimeline
+    if (timelineData.data && Array.isArray(timelineData.data)) {
+        const processedData = timelineData.data.map(item => {
+            if (item.date && String(item.date).length === 8 && /^\d{8}$/.test(String(item.date))) {
+                // Convert YYYYMMDD to epoch timestamp
+                const dateStr = String(item.date)
+                const year = parseInt(dateStr.substring(0, 4))
+                const month = parseInt(dateStr.substring(4, 6)) - 1 // month is 0-indexed
+                const day = parseInt(dateStr.substring(6, 8))
+                const epochTimestamp = new Date(year, month, day).getTime()
+                
+                return {
+                    ...item,
+                    date: epochTimestamp
+                }
+            }
+            return item
+        })
+        
+        return {
+            ...timelineData,
+            data: processedData
+        }
+    }
+    
+    return timelineData
 }
 
 const getTableData = (message) => {
@@ -406,7 +552,6 @@ const handleFeedbackSubmitted = async (feedbackData) => {
             )
         }
 
-        console.log('Feedback submitted successfully:', feedbackData)
     } catch (error) {
         console.error('Failed to submit feedback:', error)
 
@@ -422,6 +567,216 @@ const handleFeedbackSubmitted = async (feedbackData) => {
         if (feedbackButtonsRef.value) {
             feedbackButtonsRef.value.clearLoading()
         }
+    }
+}
+
+const downloadCompleteResponsePDF = async () => {
+    try {
+        await generateComprehensivePDF(props.message)
+    } catch (error) {
+        console.error('Failed to generate comprehensive PDF:', error)
+        // You could add a toast notification here
+    }
+}
+
+const downloadCompleteResponseExcel = async () => {
+    try {
+        await generateComprehensiveExcel(props.message)
+    } catch (error) {
+        console.error('Failed to generate comprehensive Excel file:', error)
+        // You could add a toast notification here
+    }
+}
+
+const copyCompleteResponse = async () => {
+    try {
+        let fullResponse = ''
+
+
+        // Add text response if available
+        if (hasStreamingTextResponse(props.message)) {
+            const textData = getTextResponseData(props.message)
+            if (textData?.summary) {
+                fullResponse += `${textData.summary}\n\n`
+            }
+            if (textData?.bullets && textData.bullets.length > 0) {
+                textData.bullets.forEach(bullet => {
+                    fullResponse += `• ${bullet}\n`
+                })
+                fullResponse += '\n'
+            }
+        }
+
+        // Add timeline as table if available
+        if (hasStreamingTimeline(props.message)) {
+            const timelineData = getTimelineData(props.message)
+            if (timelineData?.title) {
+                fullResponse += `## ${timelineData.title}\n\n`
+            }
+
+            if (timelineData?.data && timelineData.data.length > 0) {
+                // Use fixed headers for timeline: Date, Title, Description, Status
+                const headerLabels = ['Date', 'Title', 'Description', 'Status']
+                
+                // Helper function to format cell values
+                const formatTimelineCell = (value) => {
+                    if (value === null || value === undefined || value === '' || value === 'null') {
+                        return '-'
+                    }
+                    return String(value)
+                }
+                
+                // Create timeline table header
+                fullResponse += '| ' + headerLabels.join(' | ') + ' |\n'
+                fullResponse += '|' + headerLabels.map(() => '-------').join('|') + '|\n'
+
+                // Add timeline data rows
+                timelineData.data.forEach(item => {
+                    // Handle date formatting
+                    let formattedDate = item.date
+                    if (item.date) {
+                        try {
+                            const numValue = Number(item.date)
+                            
+                            // Check if it's a Unix timestamp in milliseconds (13 digits, > 1000000000000)
+                            if (!isNaN(numValue) && numValue > 1000000000000) {
+                                const date = new Date(numValue)
+                                formattedDate = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                })
+                            }
+                            // Check if it's a YYYYMMDD format (like 20260507)
+                            else if (String(item.date).length === 8 && /^\d{8}$/.test(String(item.date))) {
+                                const dateStr = String(item.date)
+                                const year = dateStr.substring(0, 4)
+                                const month = dateStr.substring(4, 6)
+                                const day = dateStr.substring(6, 8)
+                                const date = new Date(year, month - 1, day) // month is 0-indexed
+                                formattedDate = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                })
+                            }
+                            // Fallback - try to parse as is
+                            else {
+                                const date = new Date(item.date)
+                                if (!isNaN(date.getTime())) {
+                                    formattedDate = date.toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    })
+                                } else {
+                                    formattedDate = '-'
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse date:', item.date, e)
+                            formattedDate = '-'
+                        }
+                    }
+                    
+                    // Create row with fixed column mapping
+                    const rowData = [
+                        formatTimelineCell(formattedDate),
+                        formatTimelineCell(item.title),
+                        formatTimelineCell(item.description || item.desc || item.details),
+                        formatTimelineCell(item.status)
+                    ]
+                    
+                    fullResponse += '| ' + rowData.join(' | ') + ' |\n'
+                })
+                fullResponse += '\n'
+            }
+        }
+
+        // Add table data if available
+        if (hasStreamingTable(props.message)) {
+            const tableData = getTableData(props.message)
+            if (tableData?.title) {
+                fullResponse += `## ${tableData.title}\n\n`
+            }
+
+            if (tableData?.headers && tableData?.data && tableData.data.length > 0) {
+                // Create table header
+                const headers = tableData.headers
+                fullResponse += '| ' + headers.join(' | ') + ' |\n'
+                fullResponse += '|' + headers.map(() => '----------').join('|') + '|\n'
+
+                // Add table data rows - expecting array of arrays format
+                tableData.data.forEach(row => {
+                    if (Array.isArray(row)) {
+                        // Handle array format: [label, value]
+                        const rowData = row.map(cell => {
+                            let value = cell
+                            
+                            // Handle null, empty, or "null" string values
+                            if (value === null || value === undefined || value === '' || value === 'null') {
+                                return '-'
+                            }
+                            
+                            // Handle date formatting if the cell looks like a date
+                            if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                try {
+                                    const date = new Date(value)
+                                    if (!isNaN(date.getTime())) {
+                                        value = date.toLocaleDateString()
+                                    }
+                                } catch (e) {
+                                    // Keep original value if date parsing fails
+                                }
+                            }
+                            
+                            return String(value)
+                        })
+                        fullResponse += '| ' + rowData.join(' | ') + ' |\n'
+                    } else {
+                        // Fallback to object format for backwards compatibility
+                        const rowData = headers.map(header => {
+                            let value = row[header]
+                            
+                            // Handle date formatting for Date columns
+                            if (header.toLowerCase().includes('date') && value && value !== 'N/A') {
+                                try {
+                                    if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+                                        const date = new Date(value)
+                                        if (!isNaN(date.getTime())) {
+                                            value = date.toLocaleString()
+                                        }
+                                    }
+                                } catch (e) {
+                                    // Keep original value if date parsing fails
+                                }
+                            }
+                            
+                            return value !== undefined && value !== null ? String(value) : 'N/A'
+                        })
+                        fullResponse += '| ' + rowData.join(' | ') + ' |\n'
+                    }
+                })
+                fullResponse += '\n'
+            }
+        }
+
+        // Copy to clipboard
+        if (fullResponse.trim()) {
+            await navigator.clipboard.writeText(fullResponse.trim())
+            
+            // Show checkmark icon
+            isJustCopied.value = true
+            
+            // Reset to copy icon after 2 seconds
+            // eslint-disable-next-line no-undef
+            setTimeout(() => {
+                isJustCopied.value = false
+            }, 2000)
+        }
+    } catch (error) {
+        console.error('Failed to copy complete response:', error)
+        // Could add error handling here if needed
     }
 }
 
@@ -467,4 +822,106 @@ const handleFeedbackSubmitted = async (feedbackData) => {
     opacity: 1;
     transform: translateY(0) scale(1);
 }
+
+/* Download Dropdown */
+.download-dropdown {
+    position: relative;
+}
+
+.download-menu {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%) translateX(8px);
+    border-radius: 8px;
+    padding: 4px 0;
+    min-width: 140px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+/* Theme-aware background colors */
+.download-menu {
+    background-color: white; /* Light background for light mode */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.download-menu.dark-theme {
+    background-color: #374151; /* Dark grey for dark mode */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Create invisible bridge between button and menu */
+.download-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -12px;
+    bottom: 0;
+    width: 16px;
+    background: transparent;
+    pointer-events: auto;
+    z-index: 999;
+}
+
+/* Show menu on hover of either dropdown container or menu itself */
+.download-dropdown:hover .download-menu {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Keep menu visible when hovering over the menu itself */
+.download-menu:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.download-option {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #374151; /* Dark grey text for light mode */
+    position: relative;
+    z-index: 1001;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.download-option.dark-theme {
+    color: #f3f4f6; /* Light grey text for dark mode */
+}
+
+.download-option:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Light hover for light mode */
+}
+
+.download-option:focus {
+    outline: none;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.download-option.dark-theme:hover,
+.download-option.dark-theme:focus {
+    background-color: rgba(255, 255, 255, 0.1); /* Light hover for dark mode */
+}
+
+/* Add subtle separator between dropdown items */
+.download-option:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.download-option.dark-theme:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 </style>

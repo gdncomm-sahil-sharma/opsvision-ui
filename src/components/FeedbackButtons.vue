@@ -1,5 +1,5 @@
 <template>
-    <div class="flex items-center space-x-2 mt-3">
+    <div class="flex items-center space-x-1">
         <!-- Like Button (show when no feedback or liked) -->
         <Transition
             name="button-fade"
@@ -9,9 +9,8 @@
                 v-if="!isDisliked"
                 @click="handleLike"
                 :disabled="submittingFeedback"
-                class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center"
+                class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
                 :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-500'"
-                :title="isLiked ? 'Remove like' : 'Like this response'"
             >
                 <!-- Filled Like Icon (when liked) -->
                 <svg
@@ -56,9 +55,8 @@
                 v-if="!isLiked"
                 @click="handleDislike"
                 :disabled="submittingFeedback"
-                class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center"
+                class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
                 :class="themeStore.isDark ? 'text-slate-400' : 'text-gray-500'"
-                :title="isDisliked ? 'Remove dislike' : 'Dislike this response'"
             >
                 <!-- Filled Dislike Icon (when disliked) -->
                 <svg
@@ -226,4 +224,5 @@ button:focus {
     opacity: 1;
     transform: scale(1);
 }
+
 </style>

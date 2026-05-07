@@ -5,12 +5,31 @@
     >
         <!-- Title and Search -->
         <div class="pb-4 flex justify-between items-center">
-            <h3
-                class="text-lg font-semibold"
-                :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
-            >
-                {{ title }}
-            </h3>
+            <div class="flex items-center gap-3">
+                <h3
+                    class="text-lg font-semibold"
+                    :class="themeStore.isDark ? 'text-white' : 'text-gray-900'"
+                >
+                    {{ title }}
+                </h3>
+                
+                <!-- Download Button -->
+                <button
+                    @click="downloadAsExcel"
+                    class="p-2 rounded-lg transition-colors duration-200 cursor-pointer"
+                    :class="themeStore.isDark 
+                        ? 'text-gray-300 hover:text-white hover:bg-slate-700/50' 
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'"
+                    title="Download table as Excel (.xlsx)"
+                >
+                    <!-- Download Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+            </div>
 
             <!-- Search Controls -->
             <div
@@ -230,6 +249,7 @@
 import { computed, ref, watch } from 'vue'
 import moment from 'moment'
 import { useThemeStore } from '../stores/theme.js'
+import { generateTableExcel } from '../utils/excelExport.js'
 
 const props = defineProps({
     title: {
@@ -244,6 +264,10 @@ const props = defineProps({
         type: Array,
         required: true,
         default: () => []
+    },
+    query: {
+        type: String,
+        default: null
     },
     itemsPerPage: {
         type: Number,
@@ -328,6 +352,11 @@ const visiblePages = computed(() => {
 
 // Methods
 const formatCell = (cell) => {
+    // Handle null, empty, or "null" string values
+    if (cell === null || cell === undefined || cell === '' || cell === 'null') {
+        return '-'
+    }
+    
     // Check if this might be a timestamp (assuming timestamp is in certain columns or is a large number)
     if (typeof cell === 'number' && cell > 1000000000000) {
         return moment(cell).format('MMM D, YYYY h:mm A')
@@ -358,6 +387,20 @@ const clearSearch = () => {
     searchQuery.value = ''
     searchColumn.value = ''
     currentPage.value = 1
+}
+
+const downloadAsExcel = async () => {
+    try {
+        const tableData = {
+            title: props.title,
+            headers: props.headers,
+            data: props.data // Export all data, not just paginated
+        }
+        await generateTableExcel(tableData, props.query)
+    } catch (error) {
+        console.error('Failed to generate Excel file:', error)
+        // You could add a toast notification here
+    }
 }
 
 // Reset to first page when search query changes

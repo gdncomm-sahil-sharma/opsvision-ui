@@ -8,54 +8,57 @@
             >
                 AI Response
             </span>
-            <button
-                v-if="showCopyButton"
-                class="p-1 rounded text-gray-500 cursor-pointer dark:text-gray-400 transition-colors duration-300"
-                @click="copyToClipboard"
-            >
-                <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
+            <div class="flex items-center gap-2">
+                <!-- Copy Button -->
+                <button
+                    v-if="showCopyButton"
+                    class="p-1 rounded text-gray-500 cursor-pointer dark:text-gray-400 transition-colors duration-300"
+                    @click="copyToClipboard"
                 >
-                    <!-- Main box (always visible) -->
-                    <rect
-                        x="9"
-                        y="9"
-                        width="13"
-                        height="13"
-                        rx="2"
-                        ry="2"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        :fill="justCopied ? 'currentColor' : 'none'"
-                        class="transition-all duration-300"
-                    />
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <!-- Main box (always visible) -->
+                        <rect
+                            x="9"
+                            y="9"
+                            width="13"
+                            height="13"
+                            rx="2"
+                            ry="2"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            :fill="justCopied ? 'currentColor' : 'none'"
+                            class="transition-all duration-300"
+                        />
 
-                    <!-- Copy lines (hidden when copied) -->
-                    <path
-                        v-if="!justCopied"
-                        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                        stroke="currentColor"
-                        stroke-width="1.5"
-                        class="transition-opacity duration-300"
-                        style="opacity: 1"
-                    />
+                        <!-- Copy lines (hidden when copied) -->
+                        <path
+                            v-if="!justCopied"
+                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            class="transition-opacity duration-300"
+                            style="opacity: 1"
+                        />
 
-                    <!-- Checkmark (shown when copied, positioned inside the main box) -->
-                    <path
-                        v-if="justCopied"
-                        d="M13 15.5l1.5 1.5 3-3"
-                        stroke="white"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="transition-opacity duration-300"
-                        style="opacity: 1"
-                    />
-                </svg>
-            </button>
+                        <!-- Checkmark (shown when copied, positioned inside the main box) -->
+                        <path
+                            v-if="justCopied"
+                            d="M13 15.5l1.5 1.5 3-3"
+                            stroke="white"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="transition-opacity duration-300"
+                            style="opacity: 1"
+                        />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Main content -->
@@ -125,6 +128,10 @@ const props = defineProps({
             summary: '',
             bullets: []
         })
+    },
+    query: {
+        type: String,
+        default: null
     },
     animateText: {
         type: Boolean,
@@ -220,6 +227,7 @@ const copyToClipboard = async () => {
         console.warn('Failed to copy to clipboard:', error)
     }
 }
+
 
 const updateTimestamp = () => {
     const now = new Date()
