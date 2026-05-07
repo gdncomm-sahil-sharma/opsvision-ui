@@ -14,6 +14,7 @@ declare module 'vue' {
     AIBulletin: typeof import('./src/components/AIBulletin.vue')['default']
     ChatBubble: typeof import('./src/components/ChatBubble.vue')['default']
     ChatContainer: typeof import('./src/components/ChatContainer.vue')['default']
+    ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
     DataTable: typeof import('./src/components/DataTable.vue')['default']
     FeedbackButtons: typeof import('./src/components/FeedbackButtons.vue')['default']
     FeedbackModal: typeof import('./src/components/FeedbackModal.vue')['default']

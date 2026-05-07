@@ -172,6 +172,68 @@ export async function getChatMessages (chatId, userId) {
 }
 
 /**
+ * Rename a chat
+ * @param {string} chatId - Chat ID
+ * @param {string} userId - User ID
+ * @param {string} title - New chat title
+ * @returns {Promise<object>}
+ */
+export async function renameChat (chatId, userId, title) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats/${chatId}?userId=${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title.trim()
+            })
+        })
+
+        if (!response.ok) {
+            const errorMessage = `HTTP ${response.status}: ${response.statusText}`
+            console.error('Rename Chat API Error:', errorMessage)
+            throw new Error(errorMessage)
+        }
+
+        const responseData = await response.json()
+        return responseData
+    } catch (error) {
+        console.error('Rename Chat API Error:', error.message)
+        throw error
+    }
+}
+
+/**
+ * Archive (soft delete) a chat
+ * @param {string} chatId - Chat ID
+ * @param {string} userId - User ID
+ * @returns {Promise<object>}
+ */
+export async function archiveChat (chatId, userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats/${chatId}/archive?userId=${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+
+        if (!response.ok) {
+            const errorMessage = `HTTP ${response.status}: ${response.statusText}`
+            console.error('Archive Chat API Error:', errorMessage)
+            throw new Error(errorMessage)
+        }
+
+        const responseData = await response.json()
+        return responseData
+    } catch (error) {
+        console.error('Archive Chat API Error:', error.message)
+        throw error
+    }
+}
+
+/**
  * Legacy Chat API function (kept for backward compatibility)
  * @param {string} message - Message entered in chat box
  * @returns {Promise<object>}

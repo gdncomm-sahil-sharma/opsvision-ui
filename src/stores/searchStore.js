@@ -251,6 +251,20 @@ export const useSearchStore = defineStore('search', {
             this.historyError = null
         },
 
+        updateChatInHistory (chatId, updates) {
+            const chatIndex = this.chatHistory.findIndex(chat => chat.chatId === chatId)
+            if (chatIndex !== -1) {
+                this.chatHistory[chatIndex] = { ...this.chatHistory[chatIndex], ...updates }
+            }
+        },
+
+        removeChatFromHistory (chatId) {
+            const chatIndex = this.chatHistory.findIndex(chat => chat.chatId === chatId)
+            if (chatIndex !== -1) {
+                this.chatHistory.splice(chatIndex, 1)
+            }
+        },
+
         async submitMessageFeedback (messageId, feedbackData) {
             try {
                 // Find the message and its sequence

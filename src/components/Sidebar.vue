@@ -264,23 +264,138 @@
                 v-else-if="store.chatHistory.length > 0"
                 class="space-y-1"
             >
-                <button
+                <div
                     v-for="chat in store.chatHistory"
                     :key="chat.chatId"
-                    @click="handleChatSelect(chat.chatId)"
                     :class="[
-                        'w-full text-left px-2 py-2 rounded-lg transition-all duration-200 group cursor-pointer',
+                        'group relative rounded-lg transition-all duration-200',
                         store.currentChatId === chat.chatId
-                            ? (themeStore.isDark ? 'bg-gray-700 text-white' : 'bg-blue-50 text-blue-900')
-                            : (themeStore.isDark
-                                ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900')
+                            ? (themeStore.isDark ? 'bg-gray-700' : 'bg-blue-50')
+                            : (themeStore.isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100')
                     ]"
                 >
-                    <div class="text-sm font-medium truncate">
-                        {{ chat.title }}
+                    <!-- Chat Item -->
+                    <div
+                        v-if="editingChatId !== chat.chatId"
+                        @click="handleChatSelect(chat.chatId)"
+                        :class="[
+                            'w-full text-left px-2 py-2 cursor-pointer relative',
+                            store.currentChatId === chat.chatId
+                                ? (themeStore.isDark ? 'text-white' : 'text-blue-900')
+                                : (themeStore.isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900')
+                        ]"
+                    >
+                        <!-- Chat Title (takes full width normally, adjusts on hover) -->
+                        <div
+                            :class="[
+                                'text-sm font-medium truncate transition-all duration-200',
+                                'group-hover:pr-16 pr-2'
+                            ]"
+                        >
+                            {{ chat.title }}
+                        </div>
+
+                        <!-- Action Buttons (show on hover, positioned absolutely) -->
+                        <div
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            @click.stop
+                        >
+                            <!-- Rename Button -->
+                            <button
+                                @click="startRename(chat.chatId, chat.title)"
+                                :class="[
+                                    'p-1 rounded transition-colors duration-200 cursor-pointer',
+                                    themeStore.isDark
+                                        ? 'hover:bg-gray-600 text-gray-400 hover:text-gray-200'
+                                        : 'hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+                                ]"
+                                title="Rename chat"
+                            >
+                                <svg
+                                    class="w-3 h-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button
+                                @click="confirmDelete(chat.chatId, chat.title)"
+                                :class="[
+                                    'p-1 rounded transition-colors duration-200 cursor-pointer',
+                                    themeStore.isDark
+                                        ? 'hover:bg-red-600 text-gray-400 hover:text-red-200'
+                                        : 'hover:bg-red-100 text-gray-500 hover:text-red-600'
+                                ]"
+                                title="Delete chat"
+                            >
+                                <svg
+                                    class="w-3 h-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </button>
+
+                    <!-- Edit Mode -->
+                    <div
+                        v-else
+                        class="px-2 py-2 relative chat-edit-container"
+                        ref="editContainer"
+                    >
+                        <input
+                            v-model="editingTitle"
+                            @keyup.enter="saveRename(chat.chatId)"
+                            @keyup.escape="cancelRename"
+                            :class="[
+                                'w-full text-sm font-medium bg-transparent border rounded px-2 py-1 pr-8 focus:outline-none focus:ring-1',
+                                themeStore.isDark
+                                    ? 'border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500'
+                                    : 'border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500'
+                            ]"
+                            ref="editInput"
+                            maxlength="255"
+                        />
+
+                        <!-- Save Button (Checkmark) - Inside input -->
+                        <button
+                            @click="saveRename(chat.chatId)"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded transition-colors duration-200 cursor-pointer text-gray-400 hover:text-green-600"
+                            title="Save changes"
+                        >
+                            <svg
+                                class="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Empty State -->
@@ -385,19 +500,37 @@
 
         <!-- Toast Container -->
         <Toast ref="toastRef" />
+
+        <!-- Confirm Dialog -->
+        <ConfirmDialog
+            ref="confirmDialogRef"
+            title="Delete Chat"
+            message="Are you sure you want to delete this chat? This action cannot be undone."
+            confirm-text="Delete"
+            :loading="deleteLoading"
+            @confirm="handleDeleteConfirm"
+            @cancel="handleDeleteCancel"
+        />
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSearchStore } from '../stores/searchStore.js'
 import { useThemeStore } from '../stores/theme.js'
+import { renameChat, archiveChat } from '../api.js'
 import Toast from './Toast.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 // Reactive data
 const isCollapsed = ref(false)
 const toastRef = ref(null)
+const confirmDialogRef = ref(null)
+const editingChatId = ref(null)
+const editingTitle = ref('')
+const deleteLoading = ref(false)
+const editContainer = ref(null)
 
 // Router and Store
 const router = useRouter()
@@ -448,6 +581,124 @@ const showToast = (type, title, message, duration = 4000) => {
     }
 }
 
+// Rename functionality
+const startRename = (chatId, currentTitle) => {
+    // Remove any existing listener first
+    document.removeEventListener('click', handleClickOutside, true)
+
+    editingChatId.value = chatId
+    editingTitle.value = currentTitle
+
+    // Add click outside listener after a delay
+    // eslint-disable-next-line no-undef
+    setTimeout(() => {
+        document.addEventListener('click', handleClickOutside, true)
+        console.log('Added click listener') // Debug log
+    }, 300) // Increased delay
+
+    // Focus and select the input
+    // eslint-disable-next-line no-undef
+    setTimeout(() => {
+        const inputs = document.querySelectorAll('input[ref="editInput"]')
+        if (inputs.length > 0) {
+            inputs[0].focus()
+            inputs[0].select()
+        }
+    }, 100)
+}
+
+const cancelRename = () => {
+    document.removeEventListener('click', handleClickOutside, true)
+    editingChatId.value = null
+    editingTitle.value = ''
+}
+
+const saveRename = async (chatId) => {
+    const newTitle = editingTitle.value.trim()
+
+    // Validation
+    if (!newTitle) {
+        showToast('error', 'Invalid Title', 'Chat title cannot be empty.')
+        return
+    }
+
+    if (newTitle.length > 255) {
+        showToast('error', 'Title Too Long', 'Chat title must be 255 characters or less.')
+        return
+    }
+
+    try {
+        await renameChat(chatId, 'demo-user', newTitle)
+
+        // Update the chat in the history
+        store.updateChatInHistory(chatId, { title: newTitle })
+
+        showToast('success', 'Chat Renamed', 'Chat title updated successfully.')
+        cancelRename()
+    } catch (error) {
+        console.error('Failed to rename chat:', error)
+        showToast('error', 'Rename Failed', 'Unable to rename the chat. Please try again.')
+        // Still exit edit mode on error
+        cancelRename()
+    }
+}
+
+// Handle click outside edit mode
+const handleClickOutside = (event) => {
+    if (!editingChatId.value) return
+
+    const target = event.target
+
+    // Check if clicking inside edit container
+    const editElement = target.closest('.chat-edit-container')
+    if (editElement) {
+        return // Stay in edit mode
+    }
+
+    // Click is outside edit area, cancel the edit (revert changes)
+    console.log('Clicking outside, canceling edit') // Debug log
+    cancelRename()
+}
+
+// Delete functionality
+let chatToDelete = null
+
+const confirmDelete = (chatId, chatTitle) => {
+    chatToDelete = { chatId, chatTitle }
+    confirmDialogRef.value?.show()
+}
+
+const handleDeleteConfirm = async () => {
+    if (!chatToDelete) return
+
+    deleteLoading.value = true
+
+    try {
+        await archiveChat(chatToDelete.chatId, 'demo-user')
+
+        // If this was the current chat, clear it
+        if (store.currentChatId === chatToDelete.chatId) {
+            store.clear()
+        }
+
+        // Refresh chat history instead of manual removal
+        await store.fetchChatHistory()
+
+        showToast('success', 'Chat Deleted', `"${chatToDelete.chatTitle}" has been deleted.`)
+        confirmDialogRef.value?.hide()
+        chatToDelete = null
+    } catch (error) {
+        console.error('Failed to delete chat:', error)
+        showToast('error', 'Delete Failed', 'Unable to delete the chat. Please try again.')
+    } finally {
+        deleteLoading.value = false
+    }
+}
+
+const handleDeleteCancel = () => {
+    chatToDelete = null
+}
+
 const toggleTheme = () => {
     themeStore.toggleDarkMode()
 }
@@ -460,6 +711,12 @@ onMounted(async () => {
         console.error('Failed to fetch chat history on mount:', error)
     }
 })
+
+// Cleanup on unmount
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside, true)
+})
+
 </script>
 
 <style scoped>
