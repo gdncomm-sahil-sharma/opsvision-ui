@@ -398,9 +398,9 @@ const handleFeedbackSubmitted = async (feedbackData) => {
 
         // Show success toast only if feedback was actually set (not reset)
         if (showToast && feedbackData.helpful !== null) {
-            showToast('success', 
-                'Thank you!', 
-                feedbackData.helpful 
+            showToast('success',
+                'Thank you!',
+                feedbackData.helpful
                     ? 'Your positive feedback helps us improve.'
                     : 'Your feedback helps us understand what went wrong.'
             )
@@ -409,11 +409,11 @@ const handleFeedbackSubmitted = async (feedbackData) => {
         console.log('Feedback submitted successfully:', feedbackData)
     } catch (error) {
         console.error('Failed to submit feedback:', error)
-        
+
         // Show error toast
         if (showToast) {
-            showToast('error', 
-                'Feedback Failed', 
+            showToast('error',
+                'Feedback Failed',
                 'We couldn\'t save your feedback right now. Please try again later.'
             )
         }

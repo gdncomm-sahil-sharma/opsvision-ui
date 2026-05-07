@@ -124,6 +124,54 @@ export async function submitFeedback (userId, chatId, sequence, helpful, comment
 }
 
 /**
+ * Get chat history list for sidebar
+ * @param {string} userId - User ID
+ * @param {string} status - Chat status filter (ACTIVE, ARCHIVED, etc.)
+ * @returns {Promise<Array>}
+ */
+export async function getChatHistory (userId, status = 'ACTIVE') {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats?userId=${userId}&status=${status}`)
+
+        if (!response.ok) {
+            const errorMessage = `HTTP ${response.status}: ${response.statusText}`
+            console.error('Get Chat History API Error:', errorMessage)
+            throw new Error(errorMessage)
+        }
+
+        const responseData = await response.json()
+        return responseData
+    } catch (error) {
+        console.error('Get Chat History API Error:', error.message)
+        throw error
+    }
+}
+
+/**
+ * Get messages for a specific chat
+ * @param {string} chatId - Chat ID
+ * @param {string} userId - User ID
+ * @returns {Promise<Array>}
+ */
+export async function getChatMessages (chatId, userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats/${chatId}/messages?userId=${userId}`)
+
+        if (!response.ok) {
+            const errorMessage = `HTTP ${response.status}: ${response.statusText}`
+            console.error('Get Chat Messages API Error:', errorMessage)
+            throw new Error(errorMessage)
+        }
+
+        const responseData = await response.json()
+        return responseData
+    } catch (error) {
+        console.error('Get Chat Messages API Error:', error.message)
+        throw error
+    }
+}
+
+/**
  * Legacy Chat API function (kept for backward compatibility)
  * @param {string} message - Message entered in chat box
  * @returns {Promise<object>}

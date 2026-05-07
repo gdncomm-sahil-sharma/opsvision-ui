@@ -534,18 +534,18 @@ const handleFeedbackSubmit = async (feedbackData) => {
         })
 
         // Show success toast
-        showToast('success', 
-            'Thank you!', 
-            feedbackData.helpful 
+        showToast('success',
+            'Thank you!',
+            feedbackData.helpful
                 ? 'Your positive feedback helps us improve our responses.'
                 : 'Your feedback helps us understand what went wrong and improve.'
         )
     } catch (error) {
         console.error('Failed to submit feedback:', error)
-        
+
         // Show error toast
-        showToast('error', 
-            'Feedback Failed', 
+        showToast('error',
+            'Feedback Failed',
             'We couldn\'t save your feedback right now. Please try again later.'
         )
     }

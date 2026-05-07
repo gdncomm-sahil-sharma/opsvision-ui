@@ -33,7 +33,7 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                        
+
                         <!-- Error Icon -->
                         <svg
                             v-else-if="toast.type === 'error'"
@@ -47,7 +47,7 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                        
+
                         <!-- Info Icon -->
                         <svg
                             v-else-if="toast.type === 'info'"
@@ -61,7 +61,7 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                        
+
                         <!-- Warning Icon -->
                         <svg
                             v-else-if="toast.type === 'warning'"
@@ -144,16 +144,17 @@ const addToast = (type, title, message, duration = 4000) => {
         message,
         duration
     }
-    
+
     toasts.value.push(toast)
-    
+
     // Auto-remove toast after duration
     if (duration > 0) {
+        // eslint-disable-next-line no-undef
         setTimeout(() => {
             removeToast(id)
         }, duration)
     }
-    
+
     return id
 }
 
@@ -301,7 +302,7 @@ defineExpose({
 
 /* Enhanced shadow and backdrop blur effects */
 .shadow-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
                 0 4px 6px -2px rgba(0, 0, 0, 0.05),
                 0 0 0 1px rgba(0, 0, 0, 0.05);
 }

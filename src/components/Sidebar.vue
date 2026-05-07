@@ -172,8 +172,134 @@
             </div>
         </div>
 
-        <!-- Spacer to push dark mode toggle to bottom -->
-        <div class="flex-1" />
+        <!-- Chat History Section -->
+        <div
+            v-show="!isCollapsed"
+            :class="[
+                'flex-1 overflow-y-auto px-3',
+                themeStore.isDark ? 'text-white' : 'text-gray-900'
+            ]"
+        >
+            <!-- Chat History Header -->
+            <div
+                :class="[
+                    'flex items-center justify-between text-xs font-medium uppercase tracking-wide mb-2 px-2',
+                    themeStore.isDark ? 'text-gray-400' : 'text-gray-500'
+                ]"
+            >
+                <span>Recent Chats</span>
+                <button
+                    @click="refreshChatHistory"
+                    :disabled="store.loadingHistory"
+                    :class="[
+                        'p-1 rounded transition-colors duration-200',
+                        store.loadingHistory
+                            ? 'cursor-not-allowed opacity-50'
+                            : (themeStore.isDark
+                                ? 'cursor-pointer hover:bg-gray-700 hover:text-gray-200'
+                                : 'cursor-pointer hover:bg-gray-200 hover:text-gray-700')
+                    ]"
+                    title="Refresh chat history"
+                >
+                    <svg
+                        :class="[
+                            'w-3 h-3 transition-transform duration-200',
+                            store.loadingHistory ? 'animate-spin' : ''
+                        ]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div
+                v-if="store.loadingHistory"
+                class="flex items-center justify-center py-4"
+            >
+                <svg
+                    class="animate-spin h-5 w-5 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                    />
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                </svg>
+                <span class="ml-2 text-sm text-gray-500">Loading...</span>
+            </div>
+
+            <!-- Error State -->
+            <div
+                v-else-if="store.historyError"
+                :class="[
+                    'text-sm px-2 py-1 rounded',
+                    themeStore.isDark ? 'text-red-400' : 'text-red-600'
+                ]"
+            >
+                Failed to load chat history
+            </div>
+
+            <!-- Chat History List -->
+            <div
+                v-else-if="store.chatHistory.length > 0"
+                class="space-y-1"
+            >
+                <button
+                    v-for="chat in store.chatHistory"
+                    :key="chat.chatId"
+                    @click="handleChatSelect(chat.chatId)"
+                    :class="[
+                        'w-full text-left px-2 py-2 rounded-lg transition-all duration-200 group cursor-pointer',
+                        store.currentChatId === chat.chatId
+                            ? (themeStore.isDark ? 'bg-gray-700 text-white' : 'bg-blue-50 text-blue-900')
+                            : (themeStore.isDark
+                                ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900')
+                    ]"
+                >
+                    <div class="text-sm font-medium truncate">
+                        {{ chat.title }}
+                    </div>
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div
+                v-else
+                :class="[
+                    'text-sm text-center py-4 px-2',
+                    themeStore.isDark ? 'text-gray-500' : 'text-gray-400'
+                ]"
+            >
+                No chat history
+            </div>
+        </div>
+
+        <!-- Spacer to push dark mode toggle to bottom when collapsed -->
+        <div
+            v-show="isCollapsed"
+            class="flex-1"
+        />
 
         <!-- Dark/Light Mode Toggle Button at Bottom -->
         <div
@@ -256,17 +382,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Toast Container -->
+        <Toast ref="toastRef" />
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSearchStore } from '../stores/searchStore.js'
 import { useThemeStore } from '../stores/theme.js'
+import Toast from './Toast.vue'
 
 // Reactive data
 const isCollapsed = ref(false)
+const toastRef = ref(null)
 
 // Router and Store
 const router = useRouter()
@@ -289,9 +420,46 @@ const handleNewChat = () => {
     router.push('/chat')
 }
 
+const handleChatSelect = async (chatId) => {
+    try {
+        // Load the selected chat's messages
+        await store.loadChatMessages(chatId)
+        // Navigate to chat route
+        router.push('/chat')
+    } catch (error) {
+        console.error('Failed to load chat:', error)
+        showToast('error', 'Chat Load Failed', 'Unable to load the selected chat. Please try again.')
+    }
+}
+
+const refreshChatHistory = async () => {
+    try {
+        await store.fetchChatHistory()
+        showToast('success', 'Refreshed', 'Chat history updated successfully.')
+    } catch (error) {
+        console.error('Failed to refresh chat history:', error)
+        showToast('error', 'Refresh Failed', 'Unable to refresh chat history. Please check your connection and try again.')
+    }
+}
+
+const showToast = (type, title, message, duration = 4000) => {
+    if (toastRef.value) {
+        toastRef.value.addToast(type, title, message, duration)
+    }
+}
+
 const toggleTheme = () => {
     themeStore.toggleDarkMode()
 }
+
+// Load chat history on component mount
+onMounted(async () => {
+    try {
+        await store.fetchChatHistory()
+    } catch (error) {
+        console.error('Failed to fetch chat history on mount:', error)
+    }
+})
 </script>
 
 <style scoped>

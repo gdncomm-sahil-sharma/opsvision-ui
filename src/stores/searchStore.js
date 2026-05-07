@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { streamChat, submitFeedback } from '../api.js'
+import { streamChat, submitFeedback, getChatHistory, getChatMessages } from '../api.js'
 
 export const useSearchStore = defineStore('search', {
     state: () => ({
@@ -9,7 +9,10 @@ export const useSearchStore = defineStore('search', {
         error: null,
         results: null,
         currentChatId: null,
-        currentStreamingMessageId: null
+        currentStreamingMessageId: null,
+        chatHistory: [],
+        loadingHistory: false,
+        historyError: null
     }),
 
     getters: {
@@ -93,7 +96,15 @@ export const useSearchStore = defineStore('search', {
 
             const handlers = {
                 chat_id: (event) => {
+                    const previousChatId = this.currentChatId
                     this.setChatId(event.chatId)
+
+                    // Only refresh chat history if this is a new chat (not continuing existing one)
+                    if (!previousChatId || previousChatId !== event.chatId) {
+                        this.fetchChatHistory().catch(error => {
+                            console.error('Failed to refresh chat history:', error)
+                        })
+                    }
                 },
 
                 tool_call_start: (event) => {
@@ -122,7 +133,7 @@ export const useSearchStore = defineStore('search', {
                     }
                 },
 
-                assistant_token: (event) => {
+                assistant_token: () => {
                     // We can ignore these for now as we handle complete events
                 },
 
@@ -234,6 +245,12 @@ export const useSearchStore = defineStore('search', {
             this.currentStreamingMessageId = null
         },
 
+        clearHistory () {
+            this.chatHistory = []
+            this.loadingHistory = false
+            this.historyError = null
+        },
+
         async submitMessageFeedback (messageId, feedbackData) {
             try {
                 // Find the message and its sequence
@@ -293,6 +310,90 @@ export const useSearchStore = defineStore('search', {
         getMessageFeedback (messageId) {
             const message = this.messages.find(m => m.id === messageId)
             return message?.feedback || null
+        },
+
+        async fetchChatHistory (userId = 'demo-user', status = 'ACTIVE') {
+            this.loadingHistory = true
+            this.historyError = null
+
+            try {
+                const history = await getChatHistory(userId, status)
+                this.chatHistory = history
+                return history
+            } catch (error) {
+                console.error('Failed to fetch chat history:', error)
+                this.historyError = error.message
+                throw error
+            } finally {
+                this.loadingHistory = false
+            }
+        },
+
+        async loadChatMessages (chatId, userId = 'demo-user') {
+            this.loading = true
+            this.error = null
+
+            try {
+                // Clear current messages
+                this.clearMessages()
+
+                // Set the chat ID
+                this.setChatId(chatId)
+
+                // Fetch messages from API
+                const apiMessages = await getChatMessages(chatId, userId)
+
+                // Convert API messages to our internal format
+                apiMessages.forEach(apiMessage => {
+                    // Add user message
+                    const userMessage = {
+                        id: `${apiMessage.sequence}-user`,
+                        type: 'user',
+                        content: apiMessage.query,
+                        timestamp: apiMessage.createdAt
+                    }
+                    this.addMessage(userMessage)
+
+                    // Add assistant message
+                    const assistantMessage = {
+                        id: `${apiMessage.sequence}-assistant`,
+                        type: 'assistant',
+                        content: apiMessage.response,
+                        loading: false,
+                        streaming: false,
+                        query: apiMessage.query,
+                        toolCalls: [],
+                        streamingComponents: {
+                            textResponse: { summary: apiMessage.response },
+                            timeline: null,
+                            table: null,
+                            references: apiMessage.references || null
+                        },
+                        finalData: {
+                            textResponse: { summary: apiMessage.response },
+                            references: apiMessage.references || null
+                        },
+                        results: {
+                            textResponse: { summary: apiMessage.response },
+                            references: apiMessage.references || null
+                        },
+                        timestamp: apiMessage.createdAt,
+                        feedback: apiMessage.helpful !== null ? {
+                            helpful: apiMessage.helpful,
+                            feedbackComment: apiMessage.feedbackComment
+                        } : null
+                    }
+                    this.addMessage(assistantMessage)
+                })
+
+                return apiMessages
+            } catch (error) {
+                console.error('Failed to load chat messages:', error)
+                this.error = error.message
+                throw error
+            } finally {
+                this.loading = false
+            }
         }
     }
 })

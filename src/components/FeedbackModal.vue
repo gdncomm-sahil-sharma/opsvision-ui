@@ -165,7 +165,7 @@ const positiveOptions = [
     { value: 'good_context', label: 'Good context understanding' }
 ]
 
-// Negative feedback options (ChatGPT style)  
+// Negative feedback options (ChatGPT style)
 const negativeOptions = [
     { value: 'incorrect', label: 'Incorrect or incomplete' },
     { value: 'not_what_asked', label: 'Not what I asked for' },
@@ -177,8 +177,8 @@ const negativeOptions = [
 
 // Computed properties
 const modalTitle = computed(() => {
-    return props.feedbackType === 'positive' 
-        ? 'Share feedback' 
+    return props.feedbackType === 'positive'
+        ? 'Share feedback'
         : 'Share feedback'
 })
 
@@ -198,7 +198,7 @@ const handleSubmit = async () => {
     if (isSubmitting.value) return
 
     isSubmitting.value = true
-    
+
     try {
         // Prepare feedback data
         const feedbackData = {
@@ -234,7 +234,7 @@ const toggleOption = (value) => {
 
 const buildFeedbackComment = () => {
     const parts = []
-    
+
     if (selectedOptions.value.length > 0) {
         const selectedLabels = selectedOptions.value.map(value => {
             const option = currentOptions.value.find(opt => opt.value === value)
@@ -242,11 +242,11 @@ const buildFeedbackComment = () => {
         })
         parts.push(`Categories: ${selectedLabels.join(', ')}`)
     }
-    
+
     if (comment.value.trim()) {
         parts.push(`Comment: ${comment.value.trim()}`)
     }
-    
+
     return parts.join(' | ') || (props.feedbackType === 'positive' ? 'Positive feedback' : 'Negative feedback')
 }
 
