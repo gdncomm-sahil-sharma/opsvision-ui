@@ -124,10 +124,10 @@
                                     v-model="store.inputMessage"
                                     type="text"
                                     placeholder="Ask anything about your warehouse operations..."
-                                    class="w-full px-5 py-4 pr-14 border rounded-2xl focus:outline-none focus:ring-2 focus:border-transparent shadow-lg text-lg transition-all duration-300 focus:shadow-xl focus:scale-[1.02]"
+                                    class="w-full px-5 py-4 pr-14 border rounded-2xl focus:outline-none transition-all duration-300 text-lg"
                                     :class="themeStore.isDark
-                                        ? 'text-white bg-slate-800 border-slate-600 focus:ring-slate-500 placeholder-slate-400'
-                                        : 'text-gray-900 bg-white border-gray-300 focus:ring-gray-500'"
+                                        ? 'text-white bg-slate-800 border-slate-600 placeholder-slate-400'
+                                        : 'text-gray-900 bg-white border-gray-300'"
                                     @keyup.enter="handleSendMessage"
                                     :disabled="store.loading"
                                 />
@@ -249,53 +249,7 @@
                 :style="{ left: sidebarCollapsed ? '4rem' : '16rem' }"
             >
                 <div class="max-w-4xl mx-auto">
-                    <!-- Quick Suggestion Chips -->
-                    <Transition
-                        name="chips-fade"
-                        appear
-                    >
-                        <div
-                            v-if="!store.loading && store.inputMessage.trim() === ''"
-                            class="mb-3 overflow-x-auto"
-                        >
-                            <div class="flex space-x-2 pb-1">
-                                <button
-                                    v-for="suggestion in suggestions"
-                                    :key="suggestion.id"
-                                    @click="handleSuggestionClick(suggestion.text)"
-                                    class="flex-shrink-0 flex items-center space-x-2 px-3 py-2 rounded-full border text-sm font-medium transition-all duration-200 hover:shadow-sm"
-                                    :class="themeStore.isDark
-                                        ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500'
-                                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
-                                >
-                                    <div
-                                        class="w-4 h-4 rounded-full flex items-center justify-center"
-                                        :class="themeStore.isDark
-                                            ? getDarkIconBg(suggestion.iconColor)
-                                            : suggestion.iconBg"
-                                    >
-                                        <svg
-                                            class="w-2.5 h-2.5"
-                                            :class="themeStore.isDark
-                                                ? getDarkIconColor(suggestion.iconColor)
-                                                : suggestion.iconColor"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                :d="suggestion.iconPath"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <span>{{ suggestion.title }}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </Transition>
+
 
                     <div class="flex items-stretch space-x-2">
                         <div class="relative flex-1">
@@ -303,10 +257,10 @@
                                 v-model="store.inputMessage"
                                 type="text"
                                 placeholder="Ask anything about your warehouse operations..."
-                                class="w-full h-12 px-4 pr-12 border rounded-2xl focus:outline-none focus:ring-2 focus:border-transparent shadow-sm transition-all duration-200 focus:shadow-md"
+                                class="w-full h-12 px-4 pr-12 border rounded-2xl focus:outline-none transition-all duration-200"
                                 :class="themeStore.isDark
-                                    ? 'text-white bg-slate-800 border-slate-600 focus:ring-slate-500 placeholder-slate-400'
-                                    : 'text-gray-900 bg-white border-gray-300 focus:ring-gray-500'"
+                                    ? 'text-white bg-slate-800 border-slate-600 placeholder-slate-400'
+                                    : 'text-gray-900 bg-white border-gray-300'"
                                 @keyup.enter="handleSendMessage"
                                 :disabled="store.loading"
                             />

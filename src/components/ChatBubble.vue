@@ -254,7 +254,7 @@
 
                 <!-- Actions Section (only for completed assistant messages) -->
                 <div
-                    v-if="!props.message.loading && !props.message.error && hasAnyStreamingComponents(props.message)"
+                    v-if="!props.message.loading && !props.message.error && hasMultipleStreamingComponentTypes(props.message)"
                     class="mt-3 flex items-center space-x-1"
                 >
                     <!-- Copy Button -->
@@ -312,52 +312,30 @@
                         @feedback-submitted="handleFeedbackSubmitted"
                     />
 
-                    <!-- Download Button with Dropdown -->
-                    <div
-                        v-if="hasStreamingTable(props.message) || hasMultipleStreamingComponentTypes(props.message)"
-                        class="download-dropdown relative"
+                    <!-- Download Button -->
+                    <button
+                        v-if="hasMultipleStreamingComponentTypes(props.message)"
+                        @click="downloadCompleteResponseExcel"
+                        class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
+                        :class="themeStore.isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'"
+                        title="Export as Excel"
                     >
-                        <button
-                            class="group p-1.5 transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer"
-                            :class="themeStore.isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'"
+                        <!-- Download Icon -->
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            class="transition-all duration-200 group-hover:scale-110"
                         >
-                            <!-- Download Icon -->
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                class="transition-all duration-200 group-hover:scale-110"
-                            >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7,10 12,15 17,10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div class="download-menu" :class="{ 'dark-theme': themeStore.isDark }">
-                            <button
-                                v-if="hasStreamingTable(props.message)"
-                                @click="downloadCompleteResponseExcel"
-                                class="download-option"
-                                :class="{ 'dark-theme': themeStore.isDark }"
-                            >
-                                Export as Excel
-                            </button>
-                            <button
-                                v-if="hasMultipleStreamingComponentTypes(props.message)"
-                                @click="downloadCompleteResponsePDF"
-                                class="download-option"
-                                :class="{ 'dark-theme': themeStore.isDark }"
-                            >
-                                Export as PDF
-                            </button>
-                        </div>
-                    </div>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7,10 12,15 17,10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="mt-1">
@@ -382,7 +360,6 @@ import DataTable from './DataTable.vue'
 import FeedbackButtons from './FeedbackButtons.vue'
 import { useThemeStore } from '../stores/theme.js'
 import { useSearchStore } from '../stores/searchStore.js'
-import { generateComprehensivePDF } from '../utils/pdfExport.js'
 import { generateComprehensiveExcel } from '../utils/excelExport.js'
 
 const props = defineProps({
@@ -472,6 +449,7 @@ const countStreamingComponentTypes = (message) => {
 const hasMultipleStreamingComponentTypes = (message) => {
     return countStreamingComponentTypes(message) >= 2
 }
+
 
 // Streaming data getters
 const getTextResponseData = (message) => {
@@ -570,14 +548,6 @@ const handleFeedbackSubmitted = async (feedbackData) => {
     }
 }
 
-const downloadCompleteResponsePDF = async () => {
-    try {
-        await generateComprehensivePDF(props.message)
-    } catch (error) {
-        console.error('Failed to generate comprehensive PDF:', error)
-        // You could add a toast notification here
-    }
-}
 
 const downloadCompleteResponseExcel = async () => {
     try {
@@ -823,105 +793,5 @@ const copyCompleteResponse = async () => {
     transform: translateY(0) scale(1);
 }
 
-/* Download Dropdown */
-.download-dropdown {
-    position: relative;
-}
-
-.download-menu {
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%) translateX(8px);
-    border-radius: 8px;
-    padding: 4px 0;
-    min-width: 140px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    z-index: 1000;
-}
-
-/* Theme-aware background colors */
-.download-menu {
-    background-color: white; /* Light background for light mode */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.download-menu.dark-theme {
-    background-color: #374151; /* Dark grey for dark mode */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Create invisible bridge between button and menu */
-.download-menu::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -12px;
-    bottom: 0;
-    width: 16px;
-    background: transparent;
-    pointer-events: auto;
-    z-index: 999;
-}
-
-/* Show menu on hover of either dropdown container or menu itself */
-.download-dropdown:hover .download-menu {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Keep menu visible when hovering over the menu itself */
-.download-menu:hover {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.download-option {
-    display: block;
-    width: 100%;
-    padding: 10px 16px;
-    text-align: left;
-    background: none;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: #374151; /* Dark grey text for light mode */
-    position: relative;
-    z-index: 1001;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.download-option.dark-theme {
-    color: #f3f4f6; /* Light grey text for dark mode */
-}
-
-.download-option:hover {
-    background-color: rgba(0, 0, 0, 0.05); /* Light hover for light mode */
-}
-
-.download-option:focus {
-    outline: none;
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.download-option.dark-theme:hover,
-.download-option.dark-theme:focus {
-    background-color: rgba(255, 255, 255, 0.1); /* Light hover for dark mode */
-}
-
-/* Add subtle separator between dropdown items */
-.download-option:not(:last-child) {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.download-option.dark-theme:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 </style>
