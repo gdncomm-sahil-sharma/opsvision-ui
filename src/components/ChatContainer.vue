@@ -175,6 +175,7 @@
                 <div
                     v-if="store.messages.length > 0"
                     class="max-w-4xl mx-auto space-y-1"
+                    ref="messagesContentRef"
                 >
                     <TransitionGroup
                         name="message-slide"
@@ -325,6 +326,7 @@ const sidebarCollapsed = inject('sidebarCollapsed', ref(false))
 
 // Reactive data
 const messagesContainer = ref(null)
+const messagesContentRef = ref(null)
 const latestMessageRef = ref(null)
 const currentQueryRef = ref(null)
 const scrollProgress = ref(0)
@@ -389,15 +391,21 @@ const handleSendMessage = async () => {
     store.clearInputMessage()
 
     try {
-        // Call the streaming search function
-        await store.streamSearch(query)
+        // Call the streaming search function (this adds the user message immediately)
+        const searchPromise = store.streamSearch(query)
 
-        // Scroll to show the complete query-response pair
-        await scrollToCurrentQuery()
+        // Scroll right after user message is added (very short delay)
+        await nextTick()
+        // eslint-disable-next-line no-undef
+        setTimeout(() => {
+            scrollToCurrentQuery() // Scroll current query to center
+        }, 50)
+
+        // Wait for the API call to complete
+        await searchPromise
     } catch (error) {
         console.error('Chat error:', error)
         // Error handling is done in the store
-        await scrollToCurrentQuery()
     }
 }
 
@@ -521,22 +529,22 @@ const scrollToCurrentQuery = async () => {
     if (currentQueryRef.value && messagesContainer.value) {
         currentQueryRef.value.scrollIntoView({
             behavior: 'smooth',
-            block: 'start',
+            block: 'center',
             inline: 'nearest'
         })
     }
 }
 
-// Watch for new messages and auto-scroll
-watch(() => store.messages.length, async (newLength, oldLength) => {
-    if (newLength > oldLength) {
-        // Delay scroll slightly to ensure DOM is updated
-        // eslint-disable-next-line no-undef
-        setTimeout(() => {
-            scrollToCurrentQuery()
-        }, 100)
-    }
+// Watch for chat switching - always scroll to bottom
+watch(() => store.currentChatId, async () => {
+    // Always scroll to bottom when currentChatId changes
+    // eslint-disable-next-line no-undef
+    setTimeout(() => {
+        scrollToCurrentQuery()
+    }, 300)
 }, { immediate: false })
+
+// No automatic scrolling for new messages - only scroll when user explicitly sends a message
 
 // Keyboard shortcuts for scroll navigation
 const handleKeydown = (event) => {
