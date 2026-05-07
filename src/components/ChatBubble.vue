@@ -254,7 +254,7 @@
 
                 <!-- Actions Section (only for completed assistant messages) -->
                 <div
-                    v-if="!props.message.loading && !props.message.error && hasMultipleStreamingComponentTypes(props.message)"
+                    v-if="!props.message.loading && !props.message.error && hasAnyStreamingComponents(props.message)"
                     class="mt-3 flex items-center space-x-1"
                 >
                     <!-- Copy Button -->

@@ -17,7 +17,8 @@
         <!-- Chat Messages Area -->
         <div
             class="flex-1 overflow-y-auto"
-            :class="store.messages.length === 0 ? 'px-6 py-4' : 'px-6 py-4 pb-32'"
+            :class="store.messages.length === 0 ? 'px-6 py-4' : 'px-6 py-4'"
+            :style="store.messages.length > 0 ? { 'padding-bottom': 'calc(88px + env(safe-area-inset-bottom, 0px))' } : {}"
             ref="messagesContainer"
             @scroll="handleScroll"
         >
@@ -242,15 +243,11 @@
         >
             <div
                 v-if="store.messages.length > 0"
-                class="fixed bottom-0 right-0 border-t backdrop-blur-sm px-6 py-4 z-50 transition-all duration-300"
-                :class="themeStore.isDark
-                    ? 'border-slate-700 bg-slate-900/95'
-                    : 'border-gray-200 bg-white/95'"
+                class="fixed bottom-0 right-0 px-6 py-4 z-50 transition-all duration-300 shadow-lg"
+                :class="themeStore.isDark ? 'bg-slate-900' : 'bg-gray-50'"
                 :style="{ left: sidebarCollapsed ? '4rem' : '16rem' }"
             >
                 <div class="max-w-4xl mx-auto">
-
-
                     <div class="flex items-stretch space-x-2">
                         <div class="relative flex-1">
                             <input
@@ -294,30 +291,6 @@
                                 </div>
                             </button>
                         </div>
-
-                        <!-- Start Over Button (Icon Only) -->
-                        <button
-                            @click="handleNewSearch"
-                            class="flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer border"
-                            :class="themeStore.isDark
-                                ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700 border-slate-600 focus:ring-slate-400'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-gray-300 focus:ring-gray-400'"
-                            title="Clear chat and start over"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                />
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -407,27 +380,6 @@ const suggestions = ref([
     }
 ])
 
-// Helper functions for dark mode icon colors
-const getDarkIconBg = (lightIconColor) => {
-    const colorMap = {
-        'text-blue-600': 'bg-blue-900/50',
-        'text-green-600': 'bg-green-900/50',
-        'text-purple-600': 'bg-purple-900/50',
-        'text-orange-600': 'bg-orange-900/50'
-    }
-    return colorMap[lightIconColor] || 'bg-slate-700'
-}
-
-const getDarkIconColor = (lightIconColor) => {
-    const colorMap = {
-        'text-blue-600': 'text-blue-400',
-        'text-green-600': 'text-green-400',
-        'text-purple-600': 'text-purple-400',
-        'text-orange-600': 'text-orange-400'
-    }
-    return colorMap[lightIconColor] || 'text-slate-300'
-}
-
 // Methods
 const handleSendMessage = async () => {
     if (!store.inputMessage.trim() || store.loading) return
@@ -458,10 +410,6 @@ const handleRetryQuery = (query) => {
     // Set the query in the input and trigger send
     store.setInputMessage(query)
     handleSendMessage()
-}
-
-const handleNewSearch = () => {
-    store.clear()
 }
 
 // Feedback methods
