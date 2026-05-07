@@ -369,28 +369,51 @@ export const useSearchStore = defineStore('search', {
                     this.addMessage(userMessage)
 
                     // Add assistant message
+                    // Handle both old response format and new responseData format
+                    const responseData = apiMessage.responseData || apiMessage.response
+                    const hasStructuredData = responseData && typeof responseData === 'object' &&
+                        (responseData.table || responseData.timelines || responseData.textResponse)
+
+                    let streamingComponents, finalData, results
+                    if (hasStructuredData) {
+                        // New structured responseData format
+                        streamingComponents = {
+                            textResponse: responseData.textResponse || null,
+                            timeline: responseData.timelines || null,
+                            table: responseData.table || null,
+                            references: responseData.references || apiMessage.references || null
+                        }
+                        finalData = streamingComponents
+                        results = { data: responseData }
+                    } else {
+                        // Fallback to old response format (simple text)
+                        const textContent = typeof responseData === 'string' ? responseData : apiMessage.response
+                        streamingComponents = {
+                            textResponse: { summary: textContent },
+                            timeline: null,
+                            table: null,
+                            references: apiMessage.references || null
+                        }
+                        finalData = streamingComponents
+                        results = {
+                            textResponse: { summary: textContent },
+                            references: apiMessage.references || null
+                        }
+                    }
+
                     const assistantMessage = {
                         id: `${apiMessage.sequence}-assistant`,
                         type: 'assistant',
-                        content: apiMessage.response,
+                        content: hasStructuredData ?
+                            (responseData.textResponse?.summary || 'Response received') :
+                            (typeof responseData === 'string' ? responseData : apiMessage.response),
                         loading: false,
                         streaming: false,
                         query: apiMessage.query,
                         toolCalls: [],
-                        streamingComponents: {
-                            textResponse: { summary: apiMessage.response },
-                            timeline: null,
-                            table: null,
-                            references: apiMessage.references || null
-                        },
-                        finalData: {
-                            textResponse: { summary: apiMessage.response },
-                            references: apiMessage.references || null
-                        },
-                        results: {
-                            textResponse: { summary: apiMessage.response },
-                            references: apiMessage.references || null
-                        },
+                        streamingComponents,
+                        finalData,
+                        results,
                         timestamp: apiMessage.createdAt,
                         feedback: apiMessage.helpful !== null ? {
                             helpful: apiMessage.helpful,
