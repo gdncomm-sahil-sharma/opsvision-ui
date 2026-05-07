@@ -15,6 +15,8 @@ declare module 'vue' {
     ChatBubble: typeof import('./src/components/ChatBubble.vue')['default']
     ChatContainer: typeof import('./src/components/ChatContainer.vue')['default']
     DataTable: typeof import('./src/components/DataTable.vue')['default']
+    FeedbackButtons: typeof import('./src/components/FeedbackButtons.vue')['default']
+    FeedbackModal: typeof import('./src/components/FeedbackModal.vue')['default']
     HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     QuerySearchBox: typeof import('./src/components/QuerySearchBox.vue')['default']
@@ -23,6 +25,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']
     StatusBasedTimeline: typeof import('./src/components/StatusBasedTimeline.vue')['default']
+    Toast: typeof import('./src/components/Toast.vue')['default']
     UApp: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/App.vue')['default']
     UTimeline: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Timeline.vue')['default']
   }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { streamChat } from '../api.js'
+import { streamChat, submitFeedback } from '../api.js'
 
 export const useSearchStore = defineStore('search', {
     state: () => ({
@@ -232,6 +232,67 @@ export const useSearchStore = defineStore('search', {
             this.results = null
             this.currentChatId = null
             this.currentStreamingMessageId = null
+        },
+
+        async submitMessageFeedback (messageId, feedbackData) {
+            try {
+                // Find the message and its sequence
+                const message = this.messages.find(m => m.id === messageId)
+                if (!message) {
+                    throw new Error('Message not found')
+                }
+
+                // For now, use a demo user ID and calculate sequence based on position
+                const userId = 'demo-user'
+                const assistantMessages = this.messages.filter(m => m.type === 'assistant')
+                const messageIndex = assistantMessages.findIndex(m => m.id === messageId)
+                const sequence = messageIndex + 1 // 1-based sequence
+
+                if (!this.currentChatId) {
+                    throw new Error('No active chat session')
+                }
+
+                // Submit feedback to API (or reset if helpful is null)
+                let response
+                if (feedbackData.helpful === null) {
+                    // Reset feedback - for now just update locally
+                    response = { helpful: null, feedbackComment: null }
+                } else {
+                    response = await submitFeedback(
+                        userId,
+                        this.currentChatId,
+                        sequence,
+                        feedbackData.helpful,
+                        feedbackData.comment
+                    )
+                }
+
+                // Update the message with feedback information
+                if (feedbackData.helpful === null) {
+                    // Reset feedback
+                    this.updateMessage(messageId, {
+                        feedback: null
+                    })
+                } else {
+                    this.updateMessage(messageId, {
+                        feedback: {
+                            helpful: feedbackData.helpful,
+                            feedbackComment: feedbackData.comment,
+                            submittedAt: new Date().toISOString()
+                        }
+                    })
+                }
+
+                return response
+            } catch (error) {
+                console.error('Failed to submit feedback:', error)
+                throw error
+            }
+        },
+
+        getMessageFeedback (messageId) {
+            const message = this.messages.find(m => m.id === messageId)
+            return message?.feedback || null
         }
     }
 })

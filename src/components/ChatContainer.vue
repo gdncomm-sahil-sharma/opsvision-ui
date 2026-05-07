@@ -368,12 +368,28 @@
                 </div>
             </div>
         </Transition>
+
+        <!-- Feedback Modal -->
+        <FeedbackModal
+            :is-open="feedbackModal.isOpen"
+            :message-id="feedbackModal.messageId"
+            :sequence="feedbackModal.sequence"
+            :feedback-type="feedbackModal.type"
+            :helpful="feedbackModal.helpful"
+            @close="closeFeedbackModal"
+            @submit="handleFeedbackSubmit"
+        />
+
+        <!-- Toast Notifications -->
+        <Toast ref="toastRef" />
     </div>
 </template>
 
 <script setup>
-import { ref, nextTick, inject, watch, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, inject, watch, onMounted, onUnmounted, provide } from 'vue'
 import ChatBubble from './ChatBubble.vue'
+import FeedbackModal from './FeedbackModal.vue'
+import Toast from './Toast.vue'
 import { useSearchStore } from '../stores/searchStore.js'
 import { useThemeStore } from '../stores/theme.js'
 
@@ -386,6 +402,16 @@ const latestMessageRef = ref(null)
 const currentQueryRef = ref(null)
 const scrollProgress = ref(0)
 const isScrolling = ref(false)
+const toastRef = ref(null)
+
+// Feedback modal state
+const feedbackModal = ref({
+    isOpen: false,
+    messageId: null,
+    sequence: null,
+    type: 'positive', // 'positive' or 'negative'
+    helpful: true
+})
 
 // Store
 const store = useSearchStore()
@@ -483,6 +509,57 @@ const handleRetryQuery = (query) => {
 const handleNewSearch = () => {
     store.clear()
 }
+
+// Feedback methods
+const openFeedbackModal = (feedbackData) => {
+    feedbackModal.value = {
+        isOpen: true,
+        messageId: feedbackData.messageId,
+        sequence: feedbackData.sequence,
+        type: feedbackData.type,
+        helpful: feedbackData.helpful
+    }
+}
+
+const closeFeedbackModal = () => {
+    feedbackModal.value.isOpen = false
+}
+
+const handleFeedbackSubmit = async (feedbackData) => {
+    try {
+        // Submit feedback through store
+        await store.submitMessageFeedback(feedbackData.messageId, {
+            helpful: feedbackData.helpful,
+            comment: feedbackData.comment
+        })
+
+        // Show success toast
+        showToast('success', 
+            'Thank you!', 
+            feedbackData.helpful 
+                ? 'Your positive feedback helps us improve our responses.'
+                : 'Your feedback helps us understand what went wrong and improve.'
+        )
+    } catch (error) {
+        console.error('Failed to submit feedback:', error)
+        
+        // Show error toast
+        showToast('error', 
+            'Feedback Failed', 
+            'We couldn\'t save your feedback right now. Please try again later.'
+        )
+    }
+}
+
+const showToast = (type, title, message, duration = 4000) => {
+    if (toastRef.value) {
+        toastRef.value.addToast(type, title, message, duration)
+    }
+}
+
+// Provide functions to child components
+provide('openFeedbackModal', openFeedbackModal)
+provide('showToast', showToast)
 
 // Helper function to check if a user message is part of the current query pair
 const isCurrentQueryPair = (message, index) => {

@@ -241,6 +241,21 @@
                     </Transition>
                 </div>
 
+                <!-- Feedback Section (only for completed assistant messages) -->
+                <div
+                    v-if="!message.loading && !message.error && hasAnyStreamingComponents(message)"
+                    class="mt-3"
+                >
+                    <FeedbackButtons
+                        ref="feedbackButtonsRef"
+                        :message-id="message.id"
+                        :sequence="getMessageSequence(message)"
+                        :feedback="message.feedback"
+                        @open-feedback-modal="handleOpenFeedbackModal"
+                        @feedback-submitted="handleFeedbackSubmitted"
+                    />
+                </div>
+
                 <div class="mt-1">
                     <span
                         class="text-xs"
@@ -255,12 +270,14 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, ref, inject } from 'vue'
 import { getResponseType } from '../utils/responseHelper.js'
 import StatusBasedTimeline from './StatusBasedTimeline.vue'
 import AIBulletin from './AIBulletin.vue'
 import DataTable from './DataTable.vue'
+import FeedbackButtons from './FeedbackButtons.vue'
 import { useThemeStore } from '../stores/theme.js'
+import { useSearchStore } from '../stores/searchStore.js'
 
 defineProps({
     message: {
@@ -271,6 +288,14 @@ defineProps({
 
 const emit = defineEmits(['retry-query'])
 const themeStore = useThemeStore()
+const searchStore = useSearchStore()
+
+// Inject functions from parent (ChatContainer)
+const openFeedbackModal = inject('openFeedbackModal', null)
+const showToast = inject('showToast', null)
+
+// Refs
+const feedbackButtonsRef = ref(null)
 
 const formatTime = (timestamp) => {
     if (!timestamp) return ''
@@ -345,6 +370,59 @@ const getTimelineData = (message) => {
 
 const getTableData = (message) => {
     return message.streamingComponents?.table || message.results?.data?.table || { title: '', headers: [], data: [] }
+}
+
+// Feedback handling methods
+const getMessageSequence = (message) => {
+    // Calculate sequence number for assistant messages
+    const assistantMessages = searchStore.messages.filter(m => m.type === 'assistant')
+    const messageIndex = assistantMessages.findIndex(m => m.id === message.id)
+    return messageIndex + 1 // 1-based sequence
+}
+
+const handleOpenFeedbackModal = (feedbackData) => {
+    if (openFeedbackModal) {
+        openFeedbackModal(feedbackData)
+    }
+}
+
+const handleFeedbackSubmitted = async (feedbackData) => {
+    try {
+        // Show loading state on feedback buttons
+        if (feedbackButtonsRef.value) {
+            feedbackButtonsRef.value.setLoading()
+        }
+
+        // Submit feedback through store
+        await searchStore.submitMessageFeedback(feedbackData.messageId, feedbackData)
+
+        // Show success toast only if feedback was actually set (not reset)
+        if (showToast && feedbackData.helpful !== null) {
+            showToast('success', 
+                'Thank you!', 
+                feedbackData.helpful 
+                    ? 'Your positive feedback helps us improve.'
+                    : 'Your feedback helps us understand what went wrong.'
+            )
+        }
+
+        console.log('Feedback submitted successfully:', feedbackData)
+    } catch (error) {
+        console.error('Failed to submit feedback:', error)
+        
+        // Show error toast
+        if (showToast) {
+            showToast('error', 
+                'Feedback Failed', 
+                'We couldn\'t save your feedback right now. Please try again later.'
+            )
+        }
+    } finally {
+        // Clear loading state on feedback buttons
+        if (feedbackButtonsRef.value) {
+            feedbackButtonsRef.value.clearLoading()
+        }
+    }
 }
 
 </script>

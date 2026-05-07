@@ -86,6 +86,44 @@ export async function streamChat (userId, chatId, message, handlers) {
 }
 
 /**
+ * Submit feedback for a chat message
+ * @param {string} userId - User ID
+ * @param {string} chatId - Chat ID
+ * @param {number} sequence - Message sequence number
+ * @param {boolean} helpful - Whether the response was helpful (true/false)
+ * @param {string} comment - Optional feedback comment
+ * @returns {Promise<object>}
+ */
+export async function submitFeedback (userId, chatId, sequence, helpful, comment = '') {
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats/${chatId}/messages/${sequence}/feedback?userId=${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                helpful,
+                comment: comment.trim() || null
+            })
+        })
+
+        // Check if response is not ok
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            const errorMessage = errorData.message || `HTTP ${response.status}: ${response.statusText}`
+            console.error('Feedback API Error:', errorMessage)
+            throw new Error(errorMessage)
+        }
+
+        const responseData = await response.json()
+        return responseData
+    } catch (error) {
+        console.error('Feedback API Error:', error.message)
+        throw error
+    }
+}
+
+/**
  * Legacy Chat API function (kept for backward compatibility)
  * @param {string} message - Message entered in chat box
  * @returns {Promise<object>}
