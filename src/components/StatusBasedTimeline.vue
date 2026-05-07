@@ -152,17 +152,38 @@ const getInlineStatusStyle = (status) => {
     <div class="w-full">
         <div class="mb-6">
             <div class="flex items-center gap-3 pb-3">
+                <!-- Dark mode - filled icon -->
                 <svg
-                    class="w-5 h-5 text-gray-600 dark:text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    v-if="themeStore.isDark"
+                    class="w-5 h-5 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
                 >
                     <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8m7.5-4v3.793l2.854 2.853l-.708.708L7.5 8.207V4zm0-1V2h-1v1zm0 11v-1h-1v1zM13 7.5h1v1h-1zm-10 0H2v1h1z"
+                        clip-rule="evenodd"
+                        stroke-width="0.5"
+                    />
+                </svg>
+                
+                <!-- Light mode - stroke icon -->
+                <svg
+                    v-else
+                    class="w-5 h-5 text-gray-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                >
+                    <path
+                        fill="none"
+                        stroke="currentColor"
+                        d="M8 4v4l3 3M8 2v1m0 10v1M2 8h1m10 0h1m.5 0a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0Z"
+                        stroke-width="1"
                     />
                 </svg>
                 <h3

@@ -31,15 +31,16 @@
         <!-- Assistant Message -->
         <div
             v-else
-            class="flex justify-start mb-6 first:mt-0"
+            class="flex justify-start mb-6 first:mt-0 relative"
         >
-            <div class="max-w-4xl overflow-hidden">
+            <div class="max-w-4xl overflow-hidden ml-12">
                 <!-- Assistant Avatar and Actions -->
                 <div class="flex items-start justify-between mb-2">
                     <div class="flex items-start space-x-4">
                         <div
-                            class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            class="absolute w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                             :class="themeStore.isDark ? 'bg-slate-700' : 'bg-gray-800'"
+                            style="left: 7px; top: 10px;"
                         >
                             <img
                                 :src="themeStore.isDark ? '/src/assets/icons/app-dark.svg' : '/src/assets/icons/app-light.svg'"

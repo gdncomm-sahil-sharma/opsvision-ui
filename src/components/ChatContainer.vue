@@ -142,23 +142,22 @@
                                 >
                                     <svg
                                         v-if="!store.loading"
-                                        class="w-4 h-4"
+                                        class="w-6 h-6 ml-px"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
                                     >
                                         <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                            fill="currentColor"
+                                            d="M4 18.5v-13L19.423 12zM5 17l11.85-5L5 7v3.885L9.846 12L5 13.116zm0 0V7z"
+                                            stroke-width="0.5"
                                         />
                                     </svg>
                                     <div
                                         v-else
-                                        class="w-4 h-4"
+                                        class="w-6 h-6"
                                     >
-                                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
                                     </div>
                                 </button>
                             </div>
@@ -272,23 +271,22 @@
                             >
                                 <svg
                                     v-if="!store.loading"
-                                    class="w-4 h-4"
+                                    class="w-6 h-6 ml-px"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
                                 >
                                     <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                        fill="currentColor"
+                                        d="M4 18.5v-13L19.423 12zM5 17l11.85-5L5 7v3.885L9.846 12L5 13.116zm0 0V7z"
+                                        stroke-width="0.5"
                                     />
                                 </svg>
                                 <div
                                     v-else
-                                    class="w-4 h-4"
+                                    class="w-6 h-6"
                                 >
-                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
                                 </div>
                             </button>
                         </div>
