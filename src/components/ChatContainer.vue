@@ -249,6 +249,54 @@
                 :style="{ left: sidebarCollapsed ? '4rem' : '16rem' }"
             >
                 <div class="max-w-4xl mx-auto">
+                    <!-- Quick Suggestion Chips -->
+                    <Transition
+                        name="chips-fade"
+                        appear
+                    >
+                        <div
+                            v-if="!store.loading && store.inputMessage.trim() === ''"
+                            class="mb-3 overflow-x-auto"
+                        >
+                            <div class="flex space-x-2 pb-1">
+                                <button
+                                    v-for="suggestion in suggestions"
+                                    :key="suggestion.id"
+                                    @click="handleSuggestionClick(suggestion.text)"
+                                    class="flex-shrink-0 flex items-center space-x-2 px-3 py-2 rounded-full border text-sm font-medium transition-all duration-200 hover:shadow-sm"
+                                    :class="themeStore.isDark
+                                        ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500'
+                                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                                >
+                                    <div
+                                        class="w-4 h-4 rounded-full flex items-center justify-center"
+                                        :class="themeStore.isDark
+                                            ? getDarkIconBg(suggestion.iconColor)
+                                            : suggestion.iconBg"
+                                    >
+                                        <svg
+                                            class="w-2.5 h-2.5"
+                                            :class="themeStore.isDark
+                                                ? getDarkIconColor(suggestion.iconColor)
+                                                : suggestion.iconColor"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                :d="suggestion.iconPath"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <span>{{ suggestion.title }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </Transition>
+
                     <div class="flex items-stretch space-x-2">
                         <div class="relative flex-1">
                             <input
@@ -378,6 +426,27 @@ const suggestions = ref([
         iconPath: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z'
     }
 ])
+
+// Helper functions for dark mode icon colors
+const getDarkIconBg = (lightIconColor) => {
+    const colorMap = {
+        'text-blue-600': 'bg-blue-900/50',
+        'text-green-600': 'bg-green-900/50',
+        'text-purple-600': 'bg-purple-900/50',
+        'text-orange-600': 'bg-orange-900/50'
+    }
+    return colorMap[lightIconColor] || 'bg-slate-700'
+}
+
+const getDarkIconColor = (lightIconColor) => {
+    const colorMap = {
+        'text-blue-600': 'text-blue-400',
+        'text-green-600': 'text-green-400',
+        'text-purple-600': 'text-purple-400',
+        'text-orange-600': 'text-orange-400'
+    }
+    return colorMap[lightIconColor] || 'text-slate-300'
+}
 
 // Methods
 const handleSendMessage = async () => {
@@ -651,5 +720,30 @@ onUnmounted(() => {
 .fade-leave-to {
     opacity: 0;
     transform: translateY(10px);
+}
+
+/* Quick suggestion chips animation */
+.chips-fade-enter-active {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.chips-fade-leave-active {
+    transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+.chips-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+}
+
+.chips-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+}
+
+.chips-fade-enter-to,
+.chips-fade-leave-from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 </style>
